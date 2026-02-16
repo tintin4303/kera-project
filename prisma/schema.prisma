@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User role enum
+enum Role {
+  MIGRANT
+  CARER
+  ADMIN
+}
+
+// Appointment status enum
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  PENDING
+}
+
+// Models for NextAuth.js
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Application Models
+
+// Application Models
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  hashedPassword String?
+  role          Role      @default(MIGRANT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Relations
+  patients      Patient[]      @relation("UserPatients") // For MIGRANT: Family members they manage
+  carerProfile  Carer?         // For CARER: Their professional profile
+  
+  appointments  Appointment[]  @relation("CarerAppointments") // Carer's appointment history
+  reports       Report[]       @relation("CarerReports")      // Carer's report history
+}
+
+model Carer {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  specialty   String?
+  experience  Int?      // Years of experience
+  verified    Boolean   @default(false)
+  
+  patients    Patient[] // Patients this carer is assigned to
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Patient {
+  id          String   @id @default(cuid())
+  name        String
+  dateOfBirth DateTime?
+  gender      String?
+  address     String?
+  city        String?
+  country     String?  @default("Myanmar")
+  
+  // Relations
+  userId      String   // The migrant worker who owns this patient record
+  user        User     @relation("UserPatients", fields: [userId], references: [id], onDelete: Cascade)
+  
+  carerId     String?  // The carer assigned to this patient
+  carer       Carer?   @relation(fields: [carerId], references: [id])
+  
+  healthRecords HealthRecord[]
+  medications   Medication[]
+  appointments  Appointment[]
+  reports       Report[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HealthRecord {
+  id                    String   @id @default(cuid())
+  patientId             String
+  patient               Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  systolicBP            Int?
+  diastolicBP           Int?
+  heartRate             Int?
+  glucose               Float?
+  temperature           Float?
+  oxygenSaturation      Int?
+  weight                Float?
+  mood                  String?  // "Happy", "Neutral", "Sad", etc.
+  notes                 String?  @db.Text
+  
+  recordedAt            DateTime @default(now())
+  recorderId            String?  // ID of the carer who recorded (optional if self-recorded)
+}
+
+model Medication {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  name        String
+  dosage      String
+  frequency   String
+  startDate   DateTime?
+  endDate     DateTime?
+  isActive    Boolean  @default(true)
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  carerId     String?
+  carer       User?             @relation("CarerAppointments", fields: [carerId], references: [id])
+  
+  scheduledAt DateTime
+  duration    Int               @default(60) // in minutes
+  status      AppointmentStatus @default(PENDING)
+  notes       String?           @db.Text
+  location    String?
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
+  carerId     String
+  carer       User     @relation("CarerReports", fields: [carerId], references: [id])
+  
+  title       String
+  summary     String   @db.Text
+  recommendations String? @db.Text
+  periodStart DateTime
+  periodEnd   DateTime
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

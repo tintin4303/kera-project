@@ -1,26 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f8fafc;
+  /* Light gray background for contrast */
   --foreground: #171717;
+
+  /* KERA Brand Colors */
+  --kera-dark-green: #004225;
+  --kera-vibrant-green: #00BE62;
+  --kera-light-green: #E0F2F1;
+  --kera-text-dark: #333333;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-kera-dark: var(--kera-dark-green);
+  --color-kera-vibrant: var(--kera-vibrant-green);
+  --color-kera-light: var(--kera-light-green);
+  --color-kera-text: var(--kera-text-dark);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
