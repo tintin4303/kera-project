@@ -14,37 +14,36 @@ interface AddHealthRecordModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    patientId?: string;
-    patientName?: string;
-    patients?: Patient[];
+    patients: Patient[];
+    preSelectedPatientId?: string; // For carer portal - pre-select patient
 }
 
 const moodOptions = [
     { value: 'Happy', icon: Smile, color: 'text-green-600', bgColor: 'bg-green-100' },
     { value: 'Neutral', icon: Meh, color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
     { value: 'Sad', icon: Frown, color: 'text-red-600', bgColor: 'bg-red-100' },
+    { value: 'Anxious', icon: Activity, color: 'text-orange-600', bgColor: 'bg-orange-100' },
 ];
 
 export default function AddHealthRecordModal({
     isOpen,
     onClose,
     onSuccess,
-    patientId,
-    patientName,
-    patients = []
+    patients = [],
+    preSelectedPatientId
 }: AddHealthRecordModalProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [mood, setMood] = useState('Neutral');
-    const [selectedPatientId, setSelectedPatientId] = useState(patientId || '');
+    const [selectedPatientId, setSelectedPatientId] = useState(preSelectedPatientId || '');
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (isOpen) {
-            setSelectedPatientId(patientId || (patients.length > 0 ? patients[0].id : ''));
+            setSelectedPatientId(preSelectedPatientId || (patients.length > 0 ? patients[0].id : ''));
             setMood('Neutral');
             setErrors({});
         }
-    }, [isOpen, patientId, patients]);
+    }, [isOpen, preSelectedPatientId, patients]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -96,18 +95,18 @@ export default function AddHealthRecordModal({
         }
     };
 
-    const displayPatientName = patientName || patients.find(p => p.id === selectedPatientId)?.name || 'Family Member';
+    const displayPatientName = patients.find(p => p.id === selectedPatientId)?.name || 'Family Member';
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={`Log Vitals${patientId ? ` for ${displayPatientName}` : ''}`}
+            title={`Log Vitals${preSelectedPatientId ? ` for ${displayPatientName}` : ''}`}
             size="lg"
         >
             <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Patient Selection (if not provided) */}
-                {!patientId && (
+                {/* Patient Selection (if not pre-selected) */}
+                {!preSelectedPatientId && (
                     <div>
                         <label className="mb-1.5 block text-sm font-medium text-gray-700">
                             Select Family Member
@@ -196,8 +195,8 @@ export default function AddHealthRecordModal({
                                 type="button"
                                 onClick={() => setMood(value)}
                                 className={`flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all ${mood === value
-                                        ? 'border-kera-vibrant bg-teal-50'
-                                        : 'border-gray-200 hover:border-gray-300'
+                                    ? 'border-kera-vibrant bg-teal-50'
+                                    : 'border-gray-200 hover:border-gray-300'
                                     }`}
                                 disabled={isLoading}
                             >

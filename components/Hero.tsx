@@ -20,7 +20,7 @@ export default function Hero() {
                 </h1>
 
                 <p className="mt-4 max-w-xl md:max-w-2xl mx-auto text-lg md:text-xl text-gray-200 leading-relaxed font-light">
-                    KERA connects migrant workers with professional carers to monitor and manage their families&apos; health back home. Real-time health tracking, smart reminders, and expert care; all in one platform.
+                    KERA is a proxy platform that connects migrant workers abroad with trusted carers in Myanmar. Monitor health, get smart reminders, receive regular reports, and chat in Burmese—all from one place.
                 </p>
 
                 <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
@@ -29,6 +29,13 @@ export default function Hero() {
                         className="group flex items-center justify-center gap-2 bg-white text-kera-dark px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
                     >
                         Get Started
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                    <Link
+                        href="/#install"
+                        className="group flex items-center justify-center gap-2 border border-white/50 text-white px-8 py-4 rounded-full text-lg font-bold hover:border-white transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                    >
+                        Install App
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>

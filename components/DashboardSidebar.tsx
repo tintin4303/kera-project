@@ -2,13 +2,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, User, FileText, LogOut } from 'lucide-react';
+import { Home, Calendar, User, MessageSquare, FileText } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 
-const navigation = [
-    { name: 'Overview', href: '/dashboard', icon: Home },
-    { name: 'Appointments', href: '/dashboard/appointments', icon: Calendar },
-    { name: 'Reports', href: '/dashboard/reports', icon: FileText },
-    { name: 'Profile', href: '/dashboard/profile', icon: User },
+export const dashboardNavigation = [
+    { name: 'nav.overview', href: '/dashboard', icon: Home },
+    { name: 'nav.appointments', href: '/dashboard/appointments', icon: Calendar },
+    { name: 'nav.reports', href: '/dashboard/reports', icon: FileText },
+    { name: 'nav.chat', href: '/dashboard/chat', icon: MessageSquare },
+    { name: 'nav.profile', href: '/dashboard/profile', icon: User },
 ];
 
 import { signOut, useSession } from 'next-auth/react';
@@ -16,6 +18,7 @@ import { signOut, useSession } from 'next-auth/react';
 export default function DashboardSidebar() {
     const pathname = usePathname();
     const { data: session } = useSession();
+    const { t } = useLanguage();
 
     return (
         <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200">
@@ -35,7 +38,7 @@ export default function DashboardSidebar() {
             {/* Nav Links */}
             <div className="flex-1 flex flex-col overflow-y-auto pt-5 pb-4">
                 <nav className="mt-5 flex-1 px-2 space-y-1">
-                    {navigation.map((item) => {
+                    {dashboardNavigation.map((item) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link
@@ -50,7 +53,7 @@ export default function DashboardSidebar() {
                                     className={`mr-3 h-5 w-5 shrink-0 transition-colors ${isActive ? 'text-kera-vibrant' : 'text-gray-400 group-hover:text-gray-500'}`}
                                     aria-hidden="true"
                                 />
-                                {item.name}
+                                {t(item.name)}
                             </Link>
                         );
                     })}
@@ -73,17 +76,14 @@ export default function DashboardSidebar() {
                                 {session?.user?.name || 'User'}
                             </p>
                             <p className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                                View profile
+                                {t('nav.view_profile')}
                             </p>
                         </div>
-                        <button
-                            onClick={() => signOut({ callbackUrl: '/' })}
-                            className="ml-auto shrink-0 bg-white p-1 rounded-full text-gray-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-                            title="Sign Out"
-                        >
-                            <LogOut className="h-5 w-5" />
-                        </button>
                     </div>
+                    <Link href="/dashboard/profile" className="ml-auto shrink-0 bg-white p-1 rounded-full text-gray-400 hover:text-kera-vibrant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kera-vibrant transition-colors">
+                        <span className="sr-only">{t('nav.view_profile')}</span>
+                        <User className="h-5 w-5" />
+                    </Link>
                 </div>
             </div>
         </div>

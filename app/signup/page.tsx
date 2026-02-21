@@ -8,7 +8,7 @@ import { signIn } from 'next-auth/react';
 
 export default function SignUp() {
     const router = useRouter();
-    const [role, setRole] = useState<'MIGRANT' | 'CARER'>('MIGRANT');
+    const [role] = useState<'MIGRANT' | 'CARER'>('MIGRANT');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -78,39 +78,8 @@ export default function SignUp() {
                     </div>
 
                     {/* Role Selection */}
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                        <button
-                            type="button"
-                            onClick={() => setRole('MIGRANT')}
-                            className={`p-4 rounded-xl border-2 text-center transition-all ${role === 'MIGRANT'
-                                ? 'border-kera-vibrant bg-kera-vibrant/5 ring-1 ring-kera-vibrant'
-                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            <div className="mx-auto w-10 h-10 mb-2 bg-blue-100 rounded-full flex items-center justify-center text-xl">
-                                🌏
-                            </div>
-                            <div className={`text-sm font-bold ${role === 'MIGRANT' ? 'text-kera-vibrant' : 'text-gray-900'}`}>
-                                Migrant Worker
-                            </div>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => setRole('CARER')}
-                            className={`p-4 rounded-xl border-2 text-center transition-all ${role === 'CARER'
-                                ? 'border-kera-vibrant bg-kera-vibrant/5 ring-1 ring-kera-vibrant'
-                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                }`}
-                        >
-                            <div className="mx-auto w-10 h-10 mb-2 bg-green-100 rounded-full flex items-center justify-center text-xl">
-                                🩺
-                            </div>
-                            <div className={`text-sm font-bold ${role === 'CARER' ? 'text-kera-vibrant' : 'text-gray-900'}`}>
-                                Professional Carer
-                            </div>
-                        </button>
-                    </div>
+                    {/* Role Selection - REMOVED (Default to MIGRANT) */}
+                    {/* <div className="mt-6 grid grid-cols-2 gap-4"> ... </div> */}
 
                     {/* Form */}
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

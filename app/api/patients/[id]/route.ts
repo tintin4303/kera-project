@@ -42,8 +42,20 @@ export async function GET(
         // Security: Ensure the user owns this patient record
         // OR the user is a CARER assigned to this patient (logic to be added later)
         if (patient.userId !== session.user.id) {
-            // Check if user is an assigned carer... implementation pending
-            return new NextResponse("Forbidden", { status: 403 });
+            // Check if user is an assigned carer
+            if (session.user.role === 'CARER') {
+                const carerProfile = await prisma.carer.findUnique({
+                    where: { userId: session.user.id }
+                });
+
+                if (carerProfile && patient.carerId === carerProfile.id) {
+                    // Authorized: User is the assigned carer
+                } else {
+                    return new NextResponse("Forbidden", { status: 403 });
+                }
+            } else {
+                return new NextResponse("Forbidden", { status: 403 });
+            }
         }
 
         return NextResponse.json(patient);

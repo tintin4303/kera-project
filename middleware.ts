@@ -10,12 +10,26 @@ export default withAuth(
 
         if (isSignInPage || isSignUpPage) {
             if (isAuth) {
+                if (token?.role === "ADMIN") {
+                    return NextResponse.redirect(new URL("/admin", req.url));
+                }
                 if (token?.role === "CARER") {
                     return NextResponse.redirect(new URL("/carer", req.url));
                 }
                 return NextResponse.redirect(new URL("/dashboard", req.url));
             }
             return null;
+        }
+
+        // Authenticated landing: send users to their portal from root
+        if (isAuth && req.nextUrl.pathname === "/") {
+            if (token?.role === "ADMIN") {
+                return NextResponse.redirect(new URL("/admin", req.url));
+            }
+            if (token?.role === "CARER") {
+                return NextResponse.redirect(new URL("/carer", req.url));
+            }
+            return NextResponse.redirect(new URL("/dashboard", req.url));
         }
 
         if (!isAuth) {
@@ -30,11 +44,20 @@ export default withAuth(
 
         // Role-based protection
         if (req.nextUrl.pathname.startsWith("/carer") && token?.role !== "CARER") {
-            return NextResponse.redirect(new URL("/dashboard", req.url));
+            const target = token?.role === "ADMIN" ? "/admin" : "/dashboard";
+            return NextResponse.redirect(new URL(target, req.url));
         }
 
-        if (req.nextUrl.pathname.startsWith("/dashboard") && token?.role === "CARER") {
-            return NextResponse.redirect(new URL("/carer", req.url));
+        if (req.nextUrl.pathname.startsWith("/dashboard") && token?.role !== "MIGRANT") {
+            const target = token?.role === "ADMIN" ? "/admin" : "/carer";
+            return NextResponse.redirect(new URL(target, req.url));
+        }
+
+        if (req.nextUrl.pathname.startsWith("/admin") && token?.role !== "ADMIN") {
+            if (token?.role === "CARER") {
+                return NextResponse.redirect(new URL("/carer", req.url));
+            }
+            return NextResponse.redirect(new URL("/dashboard", req.url));
         }
     },
     {
@@ -45,5 +68,5 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/carer/:path*", "/signin", "/signup"],
+    matcher: ["/", "/dashboard/:path*", "/carer/:path*", "/admin/:path*", "/signin", "/signup"],
 };

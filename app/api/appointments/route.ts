@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth.config";
 import { prisma } from "@/lib/prisma";
+import { AppointmentStatus, Prisma } from "@prisma/client";
 
 // GET /api/appointments
 export async function GET(req: Request) {
@@ -15,11 +16,11 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const status = searchParams.get("status");
 
-        let whereClause: any = {};
+        const whereClause: Prisma.AppointmentWhereInput = {};
 
         // Filter by status if provided (e.g. 'SCHEDULED')
-        if (status) {
-            whereClause.status = status;
+        if (status && Object.values(AppointmentStatus).includes(status as AppointmentStatus)) {
+            whereClause.status = status as AppointmentStatus;
         }
 
         if (session.user.role === 'CARER') {

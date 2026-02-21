@@ -43,3 +43,5 @@ next-env.d.ts
 *.md
 !README.md
 /app/generated/prisma
+
+seed.ts

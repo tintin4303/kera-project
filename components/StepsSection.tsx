@@ -32,49 +32,51 @@ export default function StepsSection() {
         <section className="py-24 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl font-bold text-kera-dark mb-4">Become a part of KERA</h2>
+                    <h2 className="text-4xl font-bold text-kera-dark mb-4">Built for families, carers, and admins</h2>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Whether you are a migrant worker, a professional carer, or a partner organization, join our ecosystem today.
+                        A single platform that connects families abroad to carers in Myanmar with clear roles and trusted workflows.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                     {/* Migrants */}
                     <StepCard
-                        title="For Burmese Migrants in Thailand"
+                        title="For Families Abroad"
                         icon={User}
                         colorClass="bg-kera-vibrant"
                         steps={[
-                            "Sign Up & Create Profile",
-                            "Add Family Members",
-                            "Choose Care Plan",
-                            "Monitor Health Remotely"
+                            "Create patient profiles in Myanmar",
+                            "Monitor health vitals and trends",
+                            "Set smart medication and checkup reminders",
+                            "Receive regular health reports",
+                            "Chat with carers in Burmese UI"
                         ]}
                     />
 
                     {/* Carers */}
                     <StepCard
-                        title="For Professional Carers in Myanmar"
+                        title="For Professional Carers"
                         icon={Stethoscope}
-                        colorClass="bg-blue-500" // Differentiating color
+                        colorClass="bg-blue-500"
                         steps={[
-                            "Register & Verify Credentials",
-                            "Get Assigned to Families",
-                            "Monitor & Record Vitals",
-                            "Earn Income & Reviews"
+                            "Verify credentials and get assigned",
+                            "Record vitals and care notes",
+                            "Manage medication and checkups",
+                            "Submit health reports to families",
+                            "Chat with families and admins"
                         ]}
                     />
 
                     {/* Partners */}
                     <StepCard
-                        title="For Company Partnerships in Thailand"
+                        title="For Admins"
                         icon={Building2}
-                        colorClass="bg-purple-500" // Differentiating color
+                        colorClass="bg-purple-500"
                         steps={[
-                            "Contact Us for Partnership",
-                            "Enroll Migrant Workers",
-                            "Manage Welfare Program",
-                            "Improve Employee Retention"
+                            "Verify carers and family accounts",
+                            "Match patients with trusted carers",
+                            "Manage add-on services and scheduling",
+                            "Monitor quality and compliance"
                         ]}
                     />
                 </div>

@@ -28,6 +28,12 @@ export default function Navbar() {
                         <div className="text-sm font-medium text-gray-600 hover:text-kera-dark cursor-pointer transition-colors">
                             English <span className="text-gray-300 mx-2">|</span> <span className="font-burmese">မြန်မာ</span>
                         </div>
+                        <Link href="/pricing" className="text-sm font-semibold text-gray-600 hover:text-kera-dark transition-colors">
+                            Pricing
+                        </Link>
+                        <Link href="/#install" className="text-sm font-semibold text-gray-600 hover:text-kera-dark transition-colors">
+                            Install App
+                        </Link>
                         <Link href="/signin" className="text-sm font-semibold text-kera-dark hover:text-kera-vibrant transition-colors">
                             Sign in
                         </Link>
@@ -58,6 +64,12 @@ export default function Navbar() {
                                 English <span className="text-gray-300 mx-2">|</span> <span className="font-burmese">မြန်မာ</span>
                             </div>
                         </div>
+                        <Link href="/pricing" className="block text-base font-medium text-gray-700 hover:text-kera-dark hover:bg-gray-50 px-3 py-2 rounded-md">
+                            Pricing
+                        </Link>
+                        <Link href="/#install" className="block text-base font-medium text-gray-700 hover:text-kera-dark hover:bg-gray-50 px-3 py-2 rounded-md">
+                            Install App
+                        </Link>
                         <Link href="/signin" className="block text-base font-medium text-gray-700 hover:text-kera-dark hover:bg-gray-50 px-3 py-2 rounded-md">
                             Sign in
                         </Link>

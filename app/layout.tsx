@@ -15,9 +15,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "KERA - Be There, From Here",
   description: "Connect with professional carers for your family back home.",
+  applicationName: "KERA",
+  manifest: "/manifest.webmanifest",
+  themeColor: "#004225",
+  appleWebApp: {
+    capable: true,
+    title: "KERA",
+    statusBarStyle: "default",
+  },
 };
 
 import AuthContext from '../components/auth-context';
+import { LanguageProvider } from '../components/LanguageContext';
 
 export default function RootLayout({
   children,
@@ -25,12 +34,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthContext>
-          {children}
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
         </AuthContext>
       </body>
     </html>

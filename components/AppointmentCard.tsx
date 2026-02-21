@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, Clock, MapPin, User, Video } from 'lucide-react';
 
 interface AppointmentProps {
-    id: number;
+    id: string;
     carerName: string;
     serviceType: string;
     date: string;

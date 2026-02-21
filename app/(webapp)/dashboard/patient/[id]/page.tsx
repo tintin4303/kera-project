@@ -1,9 +1,11 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { User, MapPin, Activity, Heart, Calendar, Clock, FileText } from 'lucide-react';
+import { MapPin, Activity, Heart, Calendar, Clock } from 'lucide-react';
 import MoodBadge from '@/components/MoodBadge';
-import AddHealthRecordModal from '@/components/dashboard/AddHealthRecordModal';
+import Modal from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 interface Patient {
     id: string;
@@ -13,18 +15,50 @@ interface Patient {
     address?: string;
     city?: string;
     country?: string;
-    healthRecords: any[];
-    appointments: any[];
-    medications: any[];
+    healthRecords: HealthRecord[];
+    appointments: Appointment[];
+    medications: Medication[];
 }
+
+interface HealthRecord {
+    id: string;
+    recordedAt: string;
+    systolicBP?: number | null;
+    diastolicBP?: number | null;
+    glucose?: number | null;
+    mood?: Mood | null;
+}
+
+interface Medication {
+    id: string;
+    name: string;
+    dosage?: string | null;
+    frequency?: string | null;
+}
+
+interface Appointment {
+    id: string;
+    scheduledAt: string;
+    notes?: string | null;
+}
+
+type Mood = 'Happy' | 'Neutral' | 'Sad' | 'Anxious';
 
 export default function PatientDetailsPage() {
     const params = useParams();
     const { id } = params;
     const [patient, setPatient] = useState<Patient | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
-    const [refreshKey, setRefreshKey] = useState(0);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        name: '',
+        dateOfBirth: '',
+        gender: '',
+        address: '',
+        city: '',
+        country: ''
+    });
 
     const fetchPatient = useCallback(async () => {
         if (!id) return;
@@ -45,10 +79,44 @@ export default function PatientDetailsPage() {
 
     useEffect(() => {
         fetchPatient();
-    }, [fetchPatient, refreshKey]);
+    }, [fetchPatient]);
 
-    const handleHealthRecordSuccess = () => {
-        setRefreshKey(prev => prev + 1);
+    const handleEditClick = () => {
+        if (!patient) return;
+        setEditFormData({
+            name: patient.name,
+            dateOfBirth: patient.dateOfBirth ? new Date(patient.dateOfBirth).toISOString().split('T')[0] : '',
+            gender: patient.gender || '',
+            address: patient.address || '',
+            city: patient.city || '',
+            country: patient.country || ''
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleSaveProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch(`/api/patients/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editFormData)
+            });
+
+            if (res.ok) {
+                const updatedPatient = await res.json();
+                setPatient(prev => prev ? { ...prev, ...updatedPatient } : updatedPatient);
+                setIsEditModalOpen(false);
+            } else {
+                alert("Failed to update patient");
+            }
+        } catch (error) {
+            console.error("Error updating patient", error);
+            alert("An error occurred");
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading patient details...</div>;
@@ -58,27 +126,30 @@ export default function PatientDetailsPage() {
         <div className="space-y-6">
             {/* Header / Profile Card */}
             <div className="bg-white shadow rounded-lg border border-gray-100 overflow-hidden">
-                <div className="p-6 sm:flex sm:items-center sm:justify-between">
-                    <div className="sm:flex sm:space-x-5">
+                <div className="p-4 sm:flex sm:items-center sm:justify-between">
+                    <div className="sm:flex sm:space-x-4">
                         <div className="shrink-0">
-                            <div className="mx-auto h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold">
+                            <div className="mx-auto h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
                                 {patient.name.charAt(0)}
                             </div>
                         </div>
-                        <div className="mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left">
-                            <p className="text-xl font-bold text-gray-900 sm:text-2xl">{patient.name}</p>
+                        <div className="mt-3 text-center sm:mt-0 sm:pt-1 sm:text-left">
+                            <p className="text-lg font-bold text-gray-900 sm:text-xl">{patient.name}</p>
                             <p className="text-sm font-medium text-gray-500">
                                 {patient.gender ? <span className="capitalize">{patient.gender}</span> : 'Gender not specified'}
                                 {patient.dateOfBirth && ` • ${new Date(patient.dateOfBirth).toLocaleDateString()}`}
                             </p>
-                            <div className="mt-2 flex items-center text-sm text-gray-500 justify-center sm:justify-start">
-                                <MapPin className="mr-1.5 h-4 w-4 shrink-0 text-gray-400" />
+                            <div className="mt-1 flex items-center text-sm text-gray-500 justify-center sm:justify-start">
+                                <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0 text-gray-400" />
                                 {patient.city || 'Unknown City'}, {patient.country || 'Myanmar'}
                             </div>
                         </div>
                     </div>
-                    <div className="mt-5 flex justify-center sm:mt-0">
-                        <button className="flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <div className="mt-3 flex justify-center sm:mt-0">
+                        <button 
+                            onClick={handleEditClick}
+                            className="flex justify-center items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        >
                             Edit Profile
                         </button>
                     </div>
@@ -97,12 +168,6 @@ export default function PatientDetailsPage() {
                                 <Activity className="mr-2 h-5 w-5 text-kera-vibrant" />
                                 Recent Health Records
                             </h3>
-                            <button
-                                onClick={() => setIsHealthModalOpen(true)}
-                                className="text-sm text-white bg-kera-vibrant hover:bg-[#00a855] px-3 py-1 rounded shadow-sm font-medium transition-colors"
-                            >
-                                + Log Vitals
-                            </button>
                         </div>
                         {patient.healthRecords && patient.healthRecords.length > 0 ? (
                             <div className="overflow-x-auto">
@@ -131,7 +196,7 @@ export default function PatientDetailsPage() {
                                                     {record.glucose ? `${record.glucose} mg/dL` : '-'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <MoodBadge mood={record.mood} />
+                                                    <MoodBadge mood={record.mood ?? 'Neutral'} />
                                                 </td>
                                             </tr>
                                         ))}
@@ -142,12 +207,6 @@ export default function PatientDetailsPage() {
                             <div className="p-8 text-center text-gray-500 text-sm flex flex-col items-center">
                                 <Activity className="h-10 w-10 text-gray-300 mb-2" />
                                 <p>No health records yet.</p>
-                                <button
-                                    onClick={() => setIsHealthModalOpen(true)}
-                                    className="mt-2 text-kera-vibrant hover:underline"
-                                >
-                                    Log the first check-up
-                                </button>
                             </div>
                         )}
                     </div>
@@ -182,7 +241,7 @@ export default function PatientDetailsPage() {
                     </div>
                 </div>
 
-                {/* Right Column: Appointments & Actions */}
+                {/* Right Column: Appointments */}
                 <div className="space-y-6">
                     <div className="bg-white shadow rounded-lg border border-gray-100">
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
@@ -210,40 +269,84 @@ export default function PatientDetailsPage() {
                             ) : (
                                 <div className="text-center py-4">
                                     <p className="text-sm text-gray-500 mb-3">No upcoming visits.</p>
-                                    <button className="text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md shadow-sm transition-colors">
-                                        Schedule Visit
-                                    </button>
                                 </div>
                             )}
-                        </div>
-                    </div>
-
-                    <div className="bg-white shadow rounded-lg border border-gray-100 p-4">
-                        <h3 className="text-sm font-medium text-gray-900 mb-3">Quick Actions</h3>
-                        <div className="space-y-2">
-                            <button
-                                onClick={() => setIsHealthModalOpen(true)}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md flex items-center"
-                            >
-                                <Activity className="mr-2 h-4 w-4 text-green-600" />
-                                Log Vitals
-                            </button>
-                            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-md flex items-center">
-                                <FileText className="mr-2 h-4 w-4 text-purple-600" />
-                                Add Care Note
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <AddHealthRecordModal
-                isOpen={isHealthModalOpen}
-                onClose={() => setIsHealthModalOpen(false)}
-                onSuccess={handleHealthRecordSuccess}
-                patientId={patient.id}
-                patientName={patient.name}
-            />
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title="Edit Patient Profile"
+            >
+                <form onSubmit={handleSaveProfile} className="space-y-4">
+                    <Input
+                        label="Name"
+                        value={editFormData.name}
+                        onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                        required
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input
+                            label="Date of Birth"
+                            type="date"
+                            value={editFormData.dateOfBirth}
+                            onChange={(e) => setEditFormData({ ...editFormData, dateOfBirth: e.target.value })}
+                        />
+                        <div>
+                            <label className="mb-1.5 block text-sm font-medium text-gray-700">Gender</label>
+                            <select
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-kera-vibrant focus:outline-none focus:ring-kera-vibrant"
+                                value={editFormData.gender}
+                                onChange={(e) => setEditFormData({ ...editFormData, gender: e.target.value })}
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <Input
+                        label="Address"
+                        value={editFormData.address}
+                        onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input
+                            label="City"
+                            value={editFormData.city}
+                            onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                        />
+                        <Input
+                            label="Country"
+                            value={editFormData.country}
+                            onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="mt-5 flex justify-end space-x-3">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => setIsEditModalOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            isLoading={saving}
+                        >
+                            Save Changes
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }
