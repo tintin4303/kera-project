@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { signOut } from "next-auth/react";
-import { CheckCircle, RefreshCcw, Users } from "lucide-react";
+import Link from "next/link";
+import { CheckCircle, RefreshCcw, Users, FileText } from "lucide-react";
 import Card from "@/components/ui/Card";
 
 interface Overview {
@@ -12,6 +13,7 @@ interface Overview {
     totalAdmins: number;
     unassignedPatients: number;
     unverifiedCarers: number;
+    pendingRequests: number;
 }
 
 interface Carer {
@@ -184,7 +186,21 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 mb-8">
+                    <Link href="/admin/requests">
+                        <Card hover>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase text-gray-500">Service Requests</p>
+                                    <p className="text-2xl font-bold text-gray-900">{overview?.pendingRequests ?? "-"}</p>
+                                    <p className="text-sm text-gray-500">pending action</p>
+                                </div>
+                                <div className="rounded-full bg-orange-100 p-3 text-orange-600">
+                                    <FileText className="h-5 w-5" />
+                                </div>
+                            </div>
+                        </Card>
+                    </Link>
                     <Card>
                         <div className="flex items-center justify-between">
                             <div>

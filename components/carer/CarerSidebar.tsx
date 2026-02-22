@@ -46,7 +46,7 @@ export default function CarerSidebar() {
                         </svg>
                     </div>
                     <span className="text-xl font-bold text-gray-900 tracking-tight">KERA</span>
-                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold">Carer</span>
+                    <span className="text-xs bg-accent text-primary px-2 py-0.5 rounded-full font-semibold">Carer</span>
                 </Link>
             </div>
 
@@ -60,12 +60,12 @@ export default function CarerSidebar() {
                                 key={item.name}
                                 href={item.href}
                                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                                    ? 'bg-purple-100 text-purple-700'
+                                    ? 'bg-accent text-primary'
                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                     }`}
                             >
                                 <item.icon
-                                    className={`mr-3 shrink-0 h-5 w-5 ${isActive ? 'text-purple-700' : 'text-gray-400 group-hover:text-gray-500'
+                                    className={`mr-3 shrink-0 h-5 w-5 ${isActive ? 'text-primary' : 'text-gray-400 group-hover:text-gray-500'
                                         }`}
                                 />
                                 {t(item.name)}

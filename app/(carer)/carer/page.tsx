@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Activity, Users, Calendar, Plus } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 
 interface Patient {
     id: string;
@@ -16,26 +17,14 @@ interface Patient {
 }
 
 export default function CarerDashboard() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                // This will need to be updated to fetch only assigned patients
-                const res = await fetch('/api/carer/patients');
-                if (res.ok) {
-                    setPatients(await res.json());
-                }
-            } catch (error) {
-                console.error("Failed to fetch patients", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPatients();
-    }, []);
+    const { data: patients = [], isLoading: loading } = useQuery<Patient[]>({
+        queryKey: ['carer-patients'],
+        queryFn: async () => {
+            const res = await fetch('/api/carer/patients');
+            if (!res.ok) throw new Error('Failed to fetch patients');
+            return res.json();
+        }
+    });
 
     return (
         <div className="space-y-6">
@@ -51,8 +40,8 @@ export default function CarerDashboard() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <Card>
                     <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-purple-100 p-3">
-                            <Users className="h-5 w-5 text-purple-600" />
+                        <div className="rounded-full bg-accent p-3">
+                            <Users className="h-5 w-5 text-primary" />
                         </div>
                         <div className="flex-1">
                             <p className="text-xs font-medium text-gray-500">Assigned Patients</p>
@@ -97,7 +86,7 @@ export default function CarerDashboard() {
 
                 {loading ? (
                     <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
                 ) : patients.length === 0 ? (
                     <Card className="text-center py-12">

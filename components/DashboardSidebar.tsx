@@ -2,12 +2,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, User, MessageSquare, FileText } from 'lucide-react';
+import { Home, Calendar, User, MessageSquare, FileText, Package } from 'lucide-react';
 import { useLanguage } from '@/components/LanguageContext';
 
 export const dashboardNavigation = [
     { name: 'nav.overview', href: '/dashboard', icon: Home },
     { name: 'nav.appointments', href: '/dashboard/appointments', icon: Calendar },
+    { name: 'nav.services', href: '/dashboard/services', icon: Package },
     { name: 'nav.reports', href: '/dashboard/reports', icon: FileText },
     { name: 'nav.chat', href: '/dashboard/chat', icon: MessageSquare },
     { name: 'nav.profile', href: '/dashboard/profile', icon: User },

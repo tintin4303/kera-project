@@ -4,6 +4,7 @@ import { Send, User, Loader2, MessageSquare } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Contact {
     id: string;
@@ -22,62 +23,42 @@ interface Message {
 
 export default function ChatInterface() {
     const { data: session } = useSession();
-    const [contacts, setContacts] = useState<Contact[]>([]);
+    const queryClient = useQueryClient();
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState('');
-    const [loadingContacts, setLoadingContacts] = useState(true);
-    const [loadingMessages, setLoadingMessages] = useState(false);
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        fetchContacts();
-    }, []);
-
-    useEffect(() => {
-        if (selectedContact) {
-            fetchMessages(selectedContact.id);
-            const interval = setInterval(() => fetchMessages(selectedContact.id), 5000); // Polling for new messages
-            return () => clearInterval(interval);
-        }
-    }, [selectedContact]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    const fetchContacts = async () => {
-        setLoadingContacts(true);
-        try {
+    const { data: contacts = [], isLoading: loadingContacts } = useQuery<Contact[]>({
+        queryKey: ['chat-contacts'],
+        queryFn: async () => {
             const res = await fetch('/api/chat/contacts');
-            if (res.ok) {
-                const data = await res.json();
-                setContacts(data);
-                if (data.length > 0) setSelectedContact(data[0]);
-            }
-        } catch (error) {
-            console.error("Failed to fetch contacts", error);
-        } finally {
-            setLoadingContacts(false);
+            if (!res.ok) throw new Error('Failed to fetch contacts');
+            return res.json();
         }
-    };
+    });
 
-    const fetchMessages = async (recipientId: string) => {
-        try {
-            const res = await fetch(`/api/chat/messages?recipientId=${recipientId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setMessages(data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch messages", error);
+    useEffect(() => {
+        if (contacts.length > 0 && !selectedContact) {
+            setSelectedContact(contacts[0]);
         }
-    };
+    }, [contacts, selectedContact]);
+
+    const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
+        queryKey: ['chat-messages', selectedContact?.id],
+        queryFn: async () => {
+            if (!selectedContact) return [];
+            const res = await fetch(`/api/chat/messages?recipientId=${selectedContact.id}`);
+            if (!res.ok) throw new Error('Failed to fetch messages');
+            return res.json();
+        },
+        enabled: !!selectedContact,
+        refetchInterval: 5000,
+    });
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -96,7 +77,7 @@ export default function ChatInterface() {
 
             if (res.ok) {
                 const msg = await res.json();
-                setMessages([...messages, msg]);
+                queryClient.setQueryData(['chat-messages', selectedContact.id], (old: Message[] = []) => [...old, msg]);
                 setNewMessage('');
             }
         } catch (error) {

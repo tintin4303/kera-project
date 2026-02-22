@@ -19,6 +19,9 @@
   --color-kera-vibrant: var(--kera-vibrant-green);
   --color-kera-light: var(--kera-light-green);
   --color-kera-text: var(--kera-text-dark);
+  --color-primary: var(--kera-dark-green);
+  --color-secondary: var(--kera-vibrant-green);
+  --color-accent: var(--kera-light-green);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 

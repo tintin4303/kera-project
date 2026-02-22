@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Activity, Droplet, Heart, Plus, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import MoodBadge from '@/components/MoodBadge';
 import AddHealthRecordModal from '@/components/dashboard/AddHealthRecordModal';
 import AddMedicationModal from '@/components/dashboard/AddMedicationModal';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Patient {
     id: string;
@@ -42,36 +43,40 @@ type Mood = 'Happy' | 'Neutral' | 'Sad' | 'Anxious';
 export default function CarerPatientDetail() {
     const params = useParams();
     const patientId = params.id as string;
+    const queryClient = useQueryClient();
 
-    const [patient, setPatient] = useState<Patient | null>(null);
-    const [records, setRecords] = useState<HealthRecord[]>([]);
-    const [medications, setMedications] = useState<Medication[]>([]);
-    const [loading, setLoading] = useState(true);
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
     const [isAddMedicationModalOpen, setIsAddMedicationModalOpen] = useState(false);
-    const [refreshKey, setRefreshKey] = useState(0);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [patientRes, recordsRes, medsRes] = await Promise.all([
-                    fetch(`/api/patients/${patientId}`),
-                    fetch(`/api/health-records?patientId=${patientId}`),
-                    fetch(`/api/medications?patientId=${patientId}`),
-                ]);
+    const { data: patient, isLoading: loadingPatient } = useQuery<Patient>({
+        queryKey: ['patient', patientId],
+        queryFn: async () => {
+            const res = await fetch(`/api/patients/${patientId}`);
+            if (!res.ok) throw new Error('Failed to fetch patient');
+            return res.json();
+        }
+    });
 
-                if (patientRes.ok) setPatient(await patientRes.json());
-                if (recordsRes.ok) setRecords(await recordsRes.json());
-                if (medsRes.ok) setMedications(await medsRes.json());
-            } catch (error) {
-                console.error("Failed to fetch patient data", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data: records = [] } = useQuery<HealthRecord[]>({
+        queryKey: ['health-records', patientId],
+        queryFn: async () => {
+            const res = await fetch(`/api/health-records?patientId=${patientId}`);
+            if (!res.ok) throw new Error('Failed to fetch records');
+            return res.json();
+        }
+    });
 
-        fetchData();
-    }, [patientId, refreshKey]);
+    const { data: medications = [] } = useQuery<Medication[]>({
+        queryKey: ['medications', patientId],
+        queryFn: async () => {
+            const res = await fetch(`/api/medications?patientId=${patientId}`);
+            if (!res.ok) throw new Error('Failed to fetch medications');
+            return res.json();
+        }
+    });
+
+    const loading = loadingPatient;
+    const activeMeds = medications.filter(m => m.isActive);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -97,7 +102,7 @@ export default function CarerPatientDetail() {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         );
     }
@@ -112,7 +117,6 @@ export default function CarerPatientDetail() {
 
     const latestBP = records.find(r => r.systolicBP && r.diastolicBP);
     const latestGlucose = records.find(r => r.glucose);
-    const activeMeds = medications.filter(m => m.isActive);
 
     return (
         <div className="space-y-6">
@@ -127,7 +131,7 @@ export default function CarerPatientDetail() {
             {/* Patient Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                         {patient.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -183,8 +187,8 @@ export default function CarerPatientDetail() {
 
                 <Card>
                     <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-purple-100 p-3">
-                            <Heart className="h-5 w-5 text-purple-600" />
+                        <div className="rounded-full bg-accent p-3">
+                            <Heart className="h-5 w-5 text-primary" />
                         </div>
                         <div className="flex-1">
                             <p className="text-xs font-medium text-gray-500">Active Medications</p>
@@ -289,7 +293,8 @@ export default function CarerPatientDetail() {
                 isOpen={isLogModalOpen}
                 onClose={() => setIsLogModalOpen(false)}
                 onSuccess={() => {
-                    setRefreshKey(prev => prev + 1);
+                    queryClient.invalidateQueries({ queryKey: ['health-records', patientId] });
+                    setIsLogModalOpen(false);
                 }}
                 patients={[patient]}
                 preSelectedPatientId={patient.id}
@@ -300,7 +305,8 @@ export default function CarerPatientDetail() {
                 isOpen={isAddMedicationModalOpen}
                 onClose={() => setIsAddMedicationModalOpen(false)}
                 onSuccess={() => {
-                    setRefreshKey(prev => prev + 1);
+                    queryClient.invalidateQueries({ queryKey: ['medications', patientId] });
+                    setIsAddMedicationModalOpen(false);
                 }}
                 patientId={patient.id}
             />

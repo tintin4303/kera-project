@@ -83,6 +83,8 @@ model User {
   reports       Report[]       @relation("CarerReports")      // Carer's report history
   sentMessages     Message[]   @relation("SentMessages")
   receivedMessages Message[]   @relation("ReceivedMessages")
+  subscriptions    Subscription[]
+  serviceRequests  ServiceRequest[]
 }
 
 model Carer {
@@ -123,6 +125,8 @@ model Patient {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  serviceRequests ServiceRequest[]
 }
 
 model HealthRecord {
@@ -195,6 +199,122 @@ model Report {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Subscription & Payments
+
+model Package {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int      // In smallest currency unit (e.g., satang/cents)
+  currency    String   @default("THB")
+  interval    String   // "MONTHLY", "YEARLY"
+  features    String[] // Array of features
+  isActive    Boolean  @default(true)
+  
+  subscriptions Subscription[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+  PENDING
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  packageId   String
+  package     Package            @relation(fields: [packageId], references: [id])
+  
+  status      SubscriptionStatus @default(PENDING)
+  startDate   DateTime           @default(now())
+  endDate     DateTime?
+  autoRenew   Boolean            @default(true)
+  
+  payments    Payment[]
+  
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
+  
+  amount         Int
+  currency       String
+  status         PaymentStatus @default(PENDING)
+  provider       String?       // e.g., "stripe", "manual"
+  transactionId  String?       // External transaction ID
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+// Add-on Services
+
+model AddOnService {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int      // In smallest currency unit (e.g., satang/cents)
+  currency    String   @default("THB")
+  category    String   // "MEDICAL", "TRANSPORT", "LOGISTICS"
+  isActive    Boolean  @default(true)
+  
+  requests    ServiceRequest[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ServiceRequestStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model ServiceRequest {
+  id             String               @id @default(cuid())
+  userId         String
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  patientId      String?
+  patient        Patient?             @relation(fields: [patientId], references: [id])
+
+  serviceId      String
+  service        AddOnService         @relation(fields: [serviceId], references: [id])
+  
+  status         ServiceRequestStatus @default(PENDING)
+  scheduledDate  DateTime?            // Desired date
+  
+  // Specific details
+  location       String?              // For transport
+  notes          String?              // For symptoms, medication list, etc.
+  
+  price          Int                  // Price at time of booking
+  currency       String
+  
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 }
 
 model Message {

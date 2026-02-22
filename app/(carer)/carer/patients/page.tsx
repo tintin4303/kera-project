@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Users, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useQuery } from '@tanstack/react-query';
 
 interface Patient {
     id: string;
@@ -18,25 +19,14 @@ interface Patient {
 }
 
 export default function CarerPatients() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                const res = await fetch('/api/carer/patients');
-                if (res.ok) {
-                    setPatients(await res.json());
-                }
-            } catch (error) {
-                console.error("Failed to fetch patients", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPatients();
-    }, []);
+    const { data: patients = [], isLoading: loading } = useQuery<Patient[]>({
+        queryKey: ['carer-patients'],
+        queryFn: async () => {
+            const res = await fetch('/api/carer/patients');
+            if (!res.ok) throw new Error('Failed to fetch patients');
+            return res.json();
+        }
+    });
 
     return (
         <div className="space-y-6">
@@ -53,7 +43,7 @@ export default function CarerPatients() {
             {/* Patient List */}
             {loading ? (
                 <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
             ) : patients.length === 0 ? (
                 <Card className="text-center py-12">
@@ -69,7 +59,7 @@ export default function CarerPatients() {
                         <Link key={patient.id} href={`/carer/patient/${patient.id}`}>
                             <Card hover padding="md" className="h-full cursor-pointer">
                                 <div className="flex items-start gap-3">
-                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
+                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
                                         {patient.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">

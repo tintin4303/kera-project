@@ -33,6 +33,7 @@ const translations = {
         "nav.overview": "Overview",
         "nav.appointments": "Appointments",
         "nav.reports": "Reports",
+        "nav.services": "Services",
         "nav.view_profile": "View profile",
         "schedule.empty": "No scheduled appointments yet.",
         "common.loading": "Loading...",

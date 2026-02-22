@@ -17,14 +17,16 @@ export async function GET() {
             totalMigrants,
             totalAdmins,
             unassignedPatients,
-            unverifiedCarers
+            unverifiedCarers,
+            pendingRequests
         ] = await Promise.all([
             prisma.patient.count(),
             prisma.carer.count(),
             prisma.user.count({ where: { role: "MIGRANT" } }),
             prisma.user.count({ where: { role: "ADMIN" } }),
             prisma.patient.count({ where: { carerId: null } }),
-            prisma.carer.count({ where: { verified: false } })
+            prisma.carer.count({ where: { verified: false } }),
+            prisma.serviceRequest.count({ where: { status: "PENDING" } })
         ]);
 
         return NextResponse.json({
@@ -33,7 +35,8 @@ export async function GET() {
             totalMigrants,
             totalAdmins,
             unassignedPatients,
-            unverifiedCarers
+            unverifiedCarers,
+            pendingRequests
         });
     } catch (error) {
         console.error("[ADMIN_OVERVIEW_GET]", error);

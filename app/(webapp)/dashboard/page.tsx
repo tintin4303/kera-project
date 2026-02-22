@@ -6,6 +6,7 @@ import AddPatientModal from '@/components/dashboard/AddPatientModal';
 import PatientList from '@/components/dashboard/PatientList';
 import { Button } from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import SubscriptionBanner from '@/components/subscription/SubscriptionBanner';
 
 export default function DashboardOverview() {
     const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function DashboardOverview() {
 
     return (
         <div className="space-y-8">
+            <SubscriptionBanner />
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>

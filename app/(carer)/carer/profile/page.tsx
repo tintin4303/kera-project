@@ -3,39 +3,36 @@ import React, { useState, useEffect } from 'react';
 import { useSession, signOut } from "next-auth/react";
 import { User, Mail, LogOut, Shield } from "lucide-react";
 import { useLanguage } from '@/components/LanguageContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function CarerProfilePage() {
     const { data: session, update } = useSession();
     const { t, language, setLanguage } = useLanguage();
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
     });
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await fetch('/api/profile');
-                if (res.ok) {
-                    const data = await res.json();
-                    setFormData({
-                        name: data.name || '',
-                        email: data.email || '',
-                    });
-                }
-            } catch (error) {
-                console.error("Failed to fetch profile", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const { data: profile, isLoading: loadingProfile } = useQuery({
+        queryKey: ['profile'],
+        queryFn: async () => {
+            const res = await fetch('/api/profile');
+            if (!res.ok) throw new Error('Failed to fetch profile');
+            return res.json();
+        },
+        enabled: !!session,
+    });
 
-        if (session) {
-            fetchProfile();
+    useEffect(() => {
+        if (profile) {
+            setFormData({
+                name: profile.name || '',
+                email: profile.email || '',
+            });
         }
-    }, [session]);
+    }, [profile]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -59,6 +56,7 @@ export default function CarerProfilePage() {
             if (res.ok) {
                 const updatedUser = await res.json();
                 await update({ ...session, user: { ...session?.user, name: updatedUser.name, email: updatedUser.email } });
+                queryClient.invalidateQueries({ queryKey: ['profile'] });
                 alert(language === 'en' ? 'Profile updated successfully!' : 'ပရိုဖိုင် အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ!');
             } else {
                 alert(language === 'en' ? 'Failed to update profile.' : 'ပရိုဖိုင် ပြင်ဆင်မရနိုင်ပါ။');
@@ -86,27 +84,27 @@ export default function CarerProfilePage() {
         }
     };
 
-    if (loading) return <div>{t('common.loading')}</div>;
+    if (loadingProfile && !profile) return <div>{t('common.loading')}</div>;
 
     return (
         <div className="space-y-6">
             <h1 className="text-2xl font-bold text-gray-900">{t('profile.title')}</h1>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-linear-to-r from-purple-500 to-indigo-600 h-32"></div>
+                <div className="bg-gradient-to-r from-[#004225] to-[#00BE62] h-32"></div>
                 <div className="px-6 pb-6">
                     <div className="relative flex justify-between items-end -mt-12 mb-6">
                         <div className="h-24 w-24 bg-white rounded-full p-1 shadow-md">
-                            <div className="h-full w-full bg-purple-100 rounded-full flex items-center justify-center overflow-hidden">
+                            <div className="h-full w-full bg-[#E0F2F1] rounded-full flex items-center justify-center overflow-hidden">
                                 {session?.user?.image ? (
                                     <img src={session.user.image} alt="Profile" className="h-full w-full object-cover" />
                                 ) : (
-                                    <User className="h-10 w-10 text-purple-600" />
+                                    <User className="h-10 w-10 text-[#004225]" />
                                 )}
                             </div>
                         </div>
                         <div className="mb-1">
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#E0F2F1] text-[#004225]">
                                 <Shield className="w-3 h-3 mr-1" />
                                 {t('carer.title')}
                             </span>
@@ -121,7 +119,7 @@ export default function CarerProfilePage() {
                                 name="name" 
                                 value={formData.name} 
                                 onChange={handleChange} 
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2 border" 
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#004225] focus:ring-[#004225] sm:text-sm p-2 border" 
                             />
                         </div>
                         <div>
@@ -131,7 +129,7 @@ export default function CarerProfilePage() {
                                 name="email" 
                                 value={formData.email} 
                                 onChange={handleChange} 
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2 border" 
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#004225] focus:ring-[#004225] sm:text-sm p-2 border" 
                             />
                         </div>
                         <div>
@@ -140,7 +138,7 @@ export default function CarerProfilePage() {
                                 name="language" 
                                 value={language} 
                                 onChange={handleChange} 
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#004225] focus:ring-[#004225] sm:text-sm p-2 border"
                             >
                                 <option value="en">English</option>
                                 <option value="my">မြန်မာ (Burmese)</option>
@@ -150,7 +148,7 @@ export default function CarerProfilePage() {
                             <button 
                                 type="submit" 
                                 disabled={saving}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-[#004225] hover:bg-[#003318] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#004225] disabled:opacity-50 transition-colors"
                             >
                                 {saving ? t('common.loading') : t('profile.save')}
                             </button>

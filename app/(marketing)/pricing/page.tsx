@@ -1,14 +1,50 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import { Check } from 'lucide-react';
+import SubscribeButton from '@/components/subscription/SubscribeButton';
+import { useSession } from 'next-auth/react';
+
+interface Package {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    currency: string;
+    interval: string;
+    features: string[];
+}
 
 export default function PricingPage() {
-    const corePlan = {
+    const { data: session } = useSession();
+    const [packages, setPackages] = useState<Package[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPackages = async () => {
+            try {
+                const res = await fetch('/api/packages');
+                if (res.ok) {
+                    const data = await res.json();
+                    setPackages(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch packages:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPackages();
+    }, []);
+
+    // Fallback to hardcoded if API fails or empty
+    const defaultCorePlan = {
+        id: 'core-plan',
         name: 'Core Plan',
-        price: 999,
+        price: 99900, // stored in cents/satang
         currency: 'THB',
         description: 'Everything needed for ongoing care across borders.',
         features: [
@@ -18,9 +54,9 @@ export default function PricingPage() {
             'Chat with the patient’s assigned carer',
             'Burmese language UI',
         ],
-        cta: 'Start with Core Plan',
-        href: '/signup',
     };
+
+    const corePlan = packages.find(p => p.name === 'Core Plan') || defaultCorePlan;
 
     const addOns = [
         {
@@ -61,19 +97,27 @@ export default function PricingPage() {
                             <p className="mt-2 text-gray-500 text-sm">{corePlan.description}</p>
                             <div className="mt-6 flex items-baseline">
                                 <span className="text-5xl font-extrabold text-gray-900">
-                                    {corePlan.price}
+                                    {corePlan.price / 100}
                                 </span>
                                 <span className="ml-2 text-xl font-medium text-gray-500">
                                     {corePlan.currency}
                                 </span>
                             </div>
 
-                            <Link
-                                href={corePlan.href}
-                                className="mt-8 block w-full py-3 px-6 border border-transparent rounded-xl text-center font-bold text-lg transition-colors bg-kera-vibrant text-white hover:bg-[#00a855]"
-                            >
-                                {corePlan.cta}
-                            </Link>
+                            {session ? (
+                                <SubscribeButton 
+                                    packageId={corePlan.id} 
+                                    price={corePlan.price} 
+                                    currency={corePlan.currency} 
+                                />
+                            ) : (
+                                <Link
+                                    href="/signup"
+                                    className="mt-8 block w-full py-3 px-6 border border-transparent rounded-xl text-center font-bold text-lg transition-colors bg-kera-vibrant text-white hover:bg-[#00a855]"
+                                >
+                                    Start with Core Plan
+                                </Link>
+                            )}
                         </div>
 
                         <div className="bg-gray-50 px-8 py-6 border-t border-gray-100">
