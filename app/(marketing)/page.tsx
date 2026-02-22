@@ -65,7 +65,7 @@ export default function Home() {
               <div className="flex flex-wrap items-center gap-4">
                 <div className="rounded-2xl bg-kera-dark text-white px-6 py-4 shadow-lg">
                   <div className="text-sm uppercase tracking-wide text-white/70">Core Plan</div>
-                  <div className="text-3xl font-bold">999 THB</div>
+                  <div className="text-3xl font-bold">9,900 THB</div>
                 </div>
                 <div className="rounded-2xl bg-kera-light text-kera-dark px-6 py-4 shadow-lg">
                   <div className="text-sm uppercase tracking-wide text-kera-dark/70">Add-ons</div>

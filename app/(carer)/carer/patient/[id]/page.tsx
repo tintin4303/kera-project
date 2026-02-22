@@ -1,13 +1,14 @@
 "use client";
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Activity, Droplet, Heart, Plus, ArrowLeft } from 'lucide-react';
+import { Activity, Droplet, Heart, Plus, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import MoodBadge from '@/components/MoodBadge';
 import AddHealthRecordModal from '@/components/dashboard/AddHealthRecordModal';
 import AddMedicationModal from '@/components/dashboard/AddMedicationModal';
+import AddReportModal from '@/components/dashboard/AddReportModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Patient {
@@ -38,6 +39,15 @@ interface Medication {
     isActive: boolean;
 }
 
+interface Report {
+    id: string;
+    title: string;
+    summary: string;
+    createdAt: string;
+    periodStart: string;
+    periodEnd: string;
+}
+
 type Mood = 'Happy' | 'Neutral' | 'Sad' | 'Anxious';
 
 export default function CarerPatientDetail() {
@@ -47,6 +57,7 @@ export default function CarerPatientDetail() {
 
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
     const [isAddMedicationModalOpen, setIsAddMedicationModalOpen] = useState(false);
+    const [isAddReportModalOpen, setIsAddReportModalOpen] = useState(false);
 
     const { data: patient, isLoading: loadingPatient } = useQuery<Patient>({
         queryKey: ['patient', patientId],
@@ -71,6 +82,15 @@ export default function CarerPatientDetail() {
         queryFn: async () => {
             const res = await fetch(`/api/medications?patientId=${patientId}`);
             if (!res.ok) throw new Error('Failed to fetch medications');
+            return res.json();
+        }
+    });
+
+    const { data: reports = [] } = useQuery<Report[]>({
+        queryKey: ['reports', patientId],
+        queryFn: async () => {
+            const res = await fetch(`/api/reports?patientId=${patientId}`);
+            if (!res.ok) throw new Error('Failed to fetch reports');
             return res.json();
         }
     });
@@ -288,6 +308,48 @@ export default function CarerPatientDetail() {
                 )}
             </div>
 
+            {/* Reports */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Reports</h2>
+                    <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setIsAddReportModalOpen(true)}
+                    >
+                        <Plus className="h-4 w-4 mr-1.5" />
+                        Create Report
+                    </Button>
+                </div>
+                {reports.length > 0 ? (
+                    <div className="space-y-3">
+                        {reports.map((report) => (
+                            <Card key={report.id} padding="md" hover>
+                                <div className="flex items-start gap-3">
+                                    <div className="rounded-full bg-teal-50 p-2.5 text-teal-600 mt-0.5">
+                                        <FileText className="h-5 w-5" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-semibold text-gray-900">{report.title}</p>
+                                            <p className="text-xs text-gray-500">{formatDate(report.createdAt)}</p>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Period: {new Date(report.periodStart).toLocaleDateString()} - {new Date(report.periodEnd).toLocaleDateString()}
+                                        </p>
+                                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{report.summary}</p>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <Card className="text-center py-8 bg-gray-50 border-dashed">
+                        <p className="text-sm text-gray-500">No reports created yet</p>
+                    </Card>
+                )}
+            </div>
+
             {/* Add Health Record Modal */}
             <AddHealthRecordModal
                 isOpen={isLogModalOpen}
@@ -309,6 +371,18 @@ export default function CarerPatientDetail() {
                     setIsAddMedicationModalOpen(false);
                 }}
                 patientId={patient.id}
+            />
+
+            {/* Add Report Modal */}
+            <AddReportModal
+                isOpen={isAddReportModalOpen}
+                onClose={() => setIsAddReportModalOpen(false)}
+                onSuccess={() => {
+                    queryClient.invalidateQueries({ queryKey: ['reports', patientId] });
+                    setIsAddReportModalOpen(false);
+                }}
+                patientId={patient.id}
+                patientName={patient.name}
             />
         </div>
     );

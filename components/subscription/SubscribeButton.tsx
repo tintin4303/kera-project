@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 
 interface SubscribeButtonProps {
     packageId: string;
@@ -64,7 +65,7 @@ export default function SubscribeButton({ packageId, price, currency, className 
                     Processing...
                 </span>
             ) : (
-                `Subscribe for ${(price / 100).toLocaleString()} ${currency}`
+                `Subscribe for ${formatPrice(price, currency)}`
             )}
         </button>
     );

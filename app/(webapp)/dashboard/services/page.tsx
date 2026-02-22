@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Package, Truck, Video, Pill, Plus, Clock, MapPin, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { Package, Truck, Video, Pill, Plus, Clock, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import RequestServiceModal from '@/components/services/RequestServiceModal';
 import { format } from 'date-fns';
+import { formatPrice } from '@/lib/utils';
 
 interface Service {
     id: string;
@@ -104,7 +105,7 @@ export default function ServicesPage() {
                                     {getIconForCategory(service.category)}
                                 </div>
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    {(service.price / 100).toLocaleString()} {service.currency}
+                                    {formatPrice(service.price, service.currency)}
                                 </span>
                             </div>
                             <div className="mt-4 flex-1">

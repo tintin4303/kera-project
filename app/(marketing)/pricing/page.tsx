@@ -6,6 +6,7 @@ import Footer from '../../../components/Footer';
 import { Check } from 'lucide-react';
 import SubscribeButton from '@/components/subscription/SubscribeButton';
 import { useSession } from 'next-auth/react';
+import { formatPrice } from '@/lib/utils';
 
 interface Package {
     id: string;
@@ -44,7 +45,7 @@ export default function PricingPage() {
     const defaultCorePlan = {
         id: 'core-plan',
         name: 'Core Plan',
-        price: 99900, // stored in cents/satang
+        price: 990000, // stored in cents/satang
         currency: 'THB',
         description: 'Everything needed for ongoing care across borders.',
         features: [
@@ -97,10 +98,7 @@ export default function PricingPage() {
                             <p className="mt-2 text-gray-500 text-sm">{corePlan.description}</p>
                             <div className="mt-6 flex items-baseline">
                                 <span className="text-5xl font-extrabold text-gray-900">
-                                    {corePlan.price / 100}
-                                </span>
-                                <span className="ml-2 text-xl font-medium text-gray-500">
-                                    {corePlan.currency}
+                                    {formatPrice(corePlan.price, corePlan.currency)}
                                 </span>
                             </div>
 
