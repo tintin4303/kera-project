@@ -115,16 +115,16 @@ export async function POST(req: Request) {
         const hasConflict = existingAppointments.some(appt => {
             const apptStart = new Date(appt.scheduledAt);
             const apptEnd = new Date(apptStart.getTime() + appt.duration * 60000);
-            
+
             // Check overlap: (StartA < EndB) and (EndA > StartB)
             const isOverlapping = (appointmentStart < apptEnd && appointmentEnd > apptStart);
-            
+
             if (!isOverlapping) return false;
 
             // Identify the type of conflict
             if (appt.patientId === patientId) return true; // Patient is busy
             if (carerId && appt.carerId === carerId) return true; // Carer is busy
-            
+
             return false;
         });
 
@@ -147,6 +147,66 @@ export async function POST(req: Request) {
         return NextResponse.json(appointment);
     } catch (error) {
         console.error("[APPOINTMENTS_POST]", error);
+        return new NextResponse("Internal Error", { status: 500 });
+    }
+}
+
+// PATCH /api/appointments - Update appointment status
+export async function PATCH(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) return new NextResponse("Unauthorized", { status: 401 });
+
+        const body = await req.json();
+        const { appointmentId, status } = body;
+
+        if (!appointmentId || !status) {
+            return new NextResponse("Missing required fields", { status: 400 });
+        }
+
+        // Verify the appointment exists and user has access
+        const appointment = await prisma.appointment.findUnique({
+            where: { id: appointmentId },
+            include: {
+                patient: {
+                    include: {
+                        user: true
+                    }
+                }
+            }
+        });
+
+        if (!appointment) {
+            return new NextResponse("Appointment not found", { status: 404 });
+        }
+
+        // Only the assigned carers can update the appointment
+        if (session.user.role === 'CARER' && appointment.carerId !== session.user.id) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const updatedAppointment = await prisma.appointment.update({
+            where: { id: appointmentId },
+            data: { status: status as AppointmentStatus }
+        });
+
+        // Create notification when appointment is completed
+        if (status === 'COMPLETED' && appointment.patient?.userId) {
+            await prisma.notification.create({
+                data: {
+                    userId: appointment.patient.userId,
+                    type: 'VISIT_COMPLETED',
+                    title: 'Visit Completed',
+                    message: `Your scheduled visit for ${appointment.patient.name} has been completed by the caretaker. Check the app for the visit report.`,
+                    relatedId: appointmentId,
+                    relatedType: 'appointment'
+                }
+            });
+        }
+
+        return NextResponse.json(updatedAppointment);
+    } catch (error) {
+        console.error("[APPOINTMENTS_PATCH]", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User, Loader2, MessageSquare } from 'lucide-react';
+import { Send, User, Loader2, MessageSquare, Image, Paperclip, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -19,6 +19,8 @@ interface Message {
     senderId: string;
     receiverId: string;
     createdAt: string;
+    mediaType?: string | null;
+    mediaUrl?: string | null;
 }
 
 export default function ChatInterface() {
@@ -27,6 +29,9 @@ export default function ChatInterface() {
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const [sending, setSending] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const { data: contacts = [], isLoading: loadingContacts } = useQuery<Contact[]>({
@@ -62,28 +67,86 @@ export default function ChatInterface() {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim() || !selectedContact || sending) return;
+        if (!newMessage.trim() && !selectedFile || !selectedContact || sending) return;
 
         setSending(true);
         try {
-            const res = await fetch('/api/chat/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    recipientId: selectedContact.id,
-                    content: newMessage
-                }),
-            });
+            // If there's a file, use the media upload endpoint
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('recipientId', selectedContact.id);
+                if (newMessage.trim()) {
+                    formData.append('content', newMessage);
+                }
 
-            if (res.ok) {
-                const msg = await res.json();
-                queryClient.setQueryData(['chat-messages', selectedContact.id], (old: Message[] = []) => [...old, msg]);
-                setNewMessage('');
+                const res = await fetch('/api/chat/media', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (res.ok) {
+                    const msg = await res.json();
+                    queryClient.setQueryData(['chat-messages', selectedContact.id], (old: Message[] = []) => [...old, msg]);
+                    setNewMessage('');
+                    setSelectedFile(null);
+                    setPreviewUrl(null);
+                }
+            } else {
+                // Regular text message
+                const res = await fetch('/api/chat/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recipientId: selectedContact.id,
+                        content: newMessage
+                    }),
+                });
+
+                if (res.ok) {
+                    const msg = await res.json();
+                    queryClient.setQueryData(['chat-messages', selectedContact.id], (old: Message[] = []) => [...old, msg]);
+                    setNewMessage('');
+                }
             }
         } catch (error) {
             console.error("Failed to send message", error);
         } finally {
             setSending(false);
+        }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Only images and videos are allowed.');
+                return;
+            }
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File too large. Maximum size is 10MB.');
+                return;
+            }
+
+            setSelectedFile(file);
+            // Create preview URL for images
+            if (file.type.startsWith('image/')) {
+                setPreviewUrl(URL.createObjectURL(file));
+            } else {
+                setPreviewUrl(null);
+            }
+        }
+    };
+
+    const removeSelectedFile = () => {
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     };
 
@@ -185,7 +248,25 @@ export default function ChatInterface() {
                                                     : "bg-white text-gray-900 border border-gray-100 rounded-tl-none"
                                             )}
                                         >
-                                            <p>{msg.content}</p>
+                                            {/* Media Display */}
+                                            {msg.mediaUrl && (
+                                                <div className="mb-2">
+                                                    {msg.mediaType === 'video' ? (
+                                                        <video
+                                                            src={msg.mediaUrl}
+                                                            controls
+                                                            className="rounded-lg max-w-full"
+                                                        />
+                                                    ) : (
+                                                        <img
+                                                            src={msg.mediaUrl}
+                                                            alt="Shared media"
+                                                            className="rounded-lg max-w-full"
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
+                                            {msg.content && <p>{msg.content}</p>}
                                             <p className={cn(
                                                 "text-[10px] mt-1",
                                                 isMe ? "text-white/70" : "text-gray-400"
@@ -201,7 +282,44 @@ export default function ChatInterface() {
 
                         {/* Input Area */}
                         <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white">
+                            {/* File Preview */}
+                            {selectedFile && (
+                                <div className="mb-3 relative inline-block">
+                                    {previewUrl ? (
+                                        <img
+                                            src={previewUrl}
+                                            alt="Preview"
+                                            className="h-20 w-20 object-cover rounded-lg border border-gray-200"
+                                        />
+                                    ) : (
+                                        <div className="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
+                                            <span className="text-xs text-gray-500">Video selected</span>
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={removeSelectedFile}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            )}
                             <div className="flex gap-2">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    accept="image/*,video/*"
+                                    className="hidden"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="shrink-0 rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                >
+                                    <Image size={20} />
+                                </button>
                                 <input
                                     type="text"
                                     value={newMessage}
@@ -211,7 +329,7 @@ export default function ChatInterface() {
                                 />
                                 <Button
                                     type="submit"
-                                    disabled={!newMessage.trim() || sending}
+                                    disabled={(!newMessage.trim() && !selectedFile) || sending}
                                     className="shrink-0 rounded-lg"
                                 >
                                     <Send size={18} />

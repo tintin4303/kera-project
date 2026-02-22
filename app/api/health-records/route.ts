@@ -18,15 +18,15 @@ export async function GET(req: Request) {
         const whereCondition: Prisma.HealthRecordWhereInput = {};
 
         if (session.user.role === 'CARER') {
-            const carerProfile = await prisma.carer.findUnique({
+            const carersProfile = await prisma.carer.findUnique({
                 where: { userId: session.user.id }
             });
 
-            if (!carerProfile) {
+            if (!carersProfile) {
                 return NextResponse.json([]); // No profile, no records
             }
 
-            whereCondition.patient = { carerId: carerProfile.id };
+            whereCondition.patient = { carerId: carersProfile.id };
         } else {
             // MIGRANT or default
             whereCondition.patient = { userId: session.user.id };
@@ -79,20 +79,22 @@ export async function POST(req: Request) {
         }
 
         // Verify patient assignment
-        // Since we already checked role is CARER, we check if patient is assigned to this carer
-        const carerProfile = await prisma.carer.findUnique({
+        const carersProfile = await prisma.carer.findUnique({
             where: { userId: session.user.id }
         });
 
-        if (!carerProfile) {
+        if (!carersProfile) {
             return NextResponse.json({ error: 'Carer profile not found' }, { status: 403 });
         }
 
         const patient = await prisma.patient.findFirst({
             where: {
                 id: patientId,
-                carerId: carerProfile.id
+                carerId: carersProfile.id
             },
+            include: {
+                user: true // Get the migrant owner for notifications
+            }
         });
 
         if (!patient) {
@@ -111,6 +113,56 @@ export async function POST(req: Request) {
                 recorderId: session.user.id,
             },
         });
+
+        // Check for abnormal vitals and create notifications
+        const alerts: string[] = [];
+
+        // Blood Pressure thresholds
+        if (systolicBP) {
+            const sbp = parseInt(systolicBP);
+            if (sbp >= 180 || sbp < 90) {
+                alerts.push(`Critical Blood Pressure: ${sbp} mmHg`);
+            } else if (sbp >= 140) {
+                alerts.push(`High Blood Pressure: ${sbp} mmHg`);
+            } else if (sbp < 100) {
+                alerts.push(`Low Blood Pressure: ${sbp} mmHg`);
+            }
+        }
+
+        if (diastolicBP) {
+            const dbp = parseInt(diastolicBP);
+            if (dbp >= 120 || dbp < 60) {
+                alerts.push(`Critical Diastolic: ${dbp} mmHg`);
+            } else if (dbp >= 90) {
+                alerts.push(`High Diastolic: ${dbp} mmHg`);
+            }
+        }
+
+        // Glucose thresholds (mg/dL) - fasting
+        if (glucose) {
+            const gl = parseFloat(glucose);
+            if (gl >= 400 || gl < 50) {
+                alerts.push(`Critical Glucose: ${gl} mg/dL`);
+            } else if (gl >= 200) {
+                alerts.push(`High Glucose: ${gl} mg/dL`);
+            } else if (gl < 70) {
+                alerts.push(`Low Glucose: ${gl} mg/dL`);
+            }
+        }
+
+        // Create notifications for abnormal vitals
+        if (alerts.length > 0 && patient.userId) {
+            await prisma.notification.create({
+                data: {
+                    userId: patient.userId,
+                    type: 'VITALS_ALERT',
+                    title: 'Health Alert for ' + patient.name,
+                    message: `The following readings were detected for ${patient.name}: ${alerts.join(', ')}. Please consult a healthcare provider if symptoms persist.`,
+                    relatedId: patientId,
+                    relatedType: 'patient'
+                }
+            });
+        }
 
         return NextResponse.json(record);
     } catch (error) {

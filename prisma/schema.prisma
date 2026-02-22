@@ -332,7 +332,36 @@ model Message {
   receiverId  String
   receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   isRead      Boolean  @default(false)
+  
+  // Media support for photo/video sharing
+  mediaType   String?  // "image" | "video" | null
+  mediaUrl    String?  // URL to uploaded media
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Notification model for alerts
+enum NotificationType {
+  VITALS_ALERT      // Abnormal blood pressure or glucose
+  VISIT_COMPLETED   // Carer completed a scheduled visit
+  APPOINTMENT_REMINDER // Upcoming appointment reminder
+  GENERAL          // General notifications
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String           // The user who receives the notification
+  type        NotificationType
+  title       String
+  message     String           @db.Text
+  isRead      Boolean          @default(false)
+  
+  // Optional link to related data
+  relatedId   String?          // e.g., patientId, appointmentId
+  relatedType String?          // e.g., "patient", "appointment"
+  
+  createdAt   DateTime         @default(now())
+  readAt      DateTime?
 }
 

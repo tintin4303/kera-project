@@ -45,17 +45,19 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) return new NextResponse("Unauthorized", { status: 401 });
 
-        const { recipientId, content } = await req.json();
+        const { recipientId, content, mediaType, mediaUrl } = await req.json();
 
-        if (!recipientId || !content) {
+        if (!recipientId || (!content && !mediaUrl)) {
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
         const message = await prisma.message.create({
             data: {
-                content,
+                content: content || "",
                 senderId: session.user.id,
-                receiverId: recipientId
+                receiverId: recipientId,
+                mediaType,
+                mediaUrl
             }
         });
 
