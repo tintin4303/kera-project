@@ -1,7 +1,7 @@
 "use client";
 
 // Admin dashboard overview
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
@@ -20,20 +20,33 @@ interface Overview {
 
 export default function AdminPage() {
     console.log("AdminPage rendering");
+    // Force refresh to clear HMR cache
     const [overview, setOverview] = useState<Overview | null>(null);
 
-    const fetchData = useCallback(async () => {
+    const fetchOverview = async () => {
         try {
             const overviewRes = await fetch("/api/admin/overview", { cache: "no-store" });
-            if (overviewRes.ok) setOverview(await overviewRes.json());
+            if (overviewRes.ok) return await overviewRes.json();
         } catch (error) {
             console.error("Failed to fetch overview", error);
         }
-    }, []);
+        return null;
+    };
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        let mounted = true;
+        fetchOverview().then((data) => {
+            if (mounted && data) setOverview(data);
+        });
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const handleRefresh = async () => {
+        const data = await fetchOverview();
+        if (data) setOverview(data);
+    };
 
     const handleSignOut = async () => {
         await signOut({ redirect: false });
@@ -62,7 +75,7 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-4 flex-wrap">
                         <button
-                            onClick={fetchData}
+                            onClick={handleRefresh}
                             className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                             <RefreshCcw className="mr-2 h-4 w-4" />
@@ -77,49 +90,40 @@ export default function AdminPage() {
                     </div>
                 </div>
 
-                <div className="max-w-xl mx-auto mt-8 mb-8">
-                    <div className="grid grid-cols-2 gap-6">
+                <div className="max-w-2xl mx-auto mt-8 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <Link href="/admin/requests" className="block group">
-                            <div className="aspect-square w-full rounded-full bg-white shadow-sm border-2 border-orange-100 hover:border-orange-300 transition-all flex flex-col items-center justify-center p-4 text-center hover:shadow-md group-hover:scale-105">
+                            <div className="w-36 h-36 mx-auto rounded-full bg-white shadow-sm border-2 border-orange-100 hover:border-orange-300 transition-all flex flex-col items-center justify-center p-2 text-center hover:shadow-md group-hover:scale-105">
                                 <div className="rounded-full bg-orange-100 p-2.5 mb-2 text-orange-600">
                                     <ClipboardList className="h-6 w-6" />
                                 </div>
-                                <p className="text-3xl font-bold text-gray-900 leading-none mb-1">{overview?.totalRequests ?? "-"}</p>
+                                <p className="text-2xl font-bold text-gray-900 leading-none mb-1">{overview?.totalRequests ?? "-"}</p>
                                 <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Requests</p>
                                 <p className="text-xs text-orange-600 font-medium">{overview?.pendingRequests ?? "-"} pending</p>
                             </div>
                         </Link>
 
                         <Link href="/admin/patients" className="block group">
-                            <div className="aspect-square w-full rounded-full bg-white shadow-sm border border-gray-200 flex flex-col items-center justify-center p-4 text-center hover:shadow-md hover:border-kera-vibrant transition-all group-hover:scale-105">
+                            <div className="w-36 h-36 mx-auto rounded-full bg-white shadow-sm border border-gray-200 flex flex-col items-center justify-center p-2 text-center hover:shadow-md hover:border-kera-vibrant transition-all group-hover:scale-105">
                                 <div className="rounded-full bg-kera-vibrant/10 p-2.5 mb-2 text-kera-vibrant">
                                     <Users className="h-6 w-6" />
                                 </div>
-                                <p className="text-3xl font-bold text-gray-900 leading-none mb-1">{overview?.totalPatients ?? "-"}</p>
+                                <p className="text-2xl font-bold text-gray-900 leading-none mb-1">{overview?.totalPatients ?? "-"}</p>
                                 <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Patients</p>
                                 <p className="text-xs text-gray-500">{overview?.unassignedPatients ?? "-"} unassigned</p>
                             </div>
                         </Link>
 
                         <Link href="/admin/carers" className="block group">
-                            <div className="aspect-square w-full rounded-full bg-white shadow-sm border border-gray-200 flex flex-col items-center justify-center p-4 text-center hover:shadow-md hover:border-blue-500 transition-all group-hover:scale-105">
+                            <div className="w-36 h-36 mx-auto rounded-full bg-white shadow-sm border border-gray-200 flex flex-col items-center justify-center p-2 text-center hover:shadow-md hover:border-blue-500 transition-all group-hover:scale-105">
                                 <div className="rounded-full bg-blue-100 p-2.5 mb-2 text-blue-600">
                                     <CheckCircle className="h-6 w-6" />
                                 </div>
-                                <p className="text-3xl font-bold text-gray-900 leading-none mb-1">{overview?.totalCarers ?? "-"}</p>
+                                <p className="text-2xl font-bold text-gray-900 leading-none mb-1">{overview?.totalCarers ?? "-"}</p>
                                 <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Carers</p>
                                 <p className="text-xs text-gray-500">{overview?.unverifiedCarers ?? "-"} pending</p>
                             </div>
                         </Link>
-
-                        <div className="aspect-square w-full rounded-full bg-white shadow-sm border border-gray-200 flex flex-col items-center justify-center p-4 text-center">
-                            <div className="rounded-full bg-purple-100 p-2.5 mb-2 text-purple-600">
-                                <Users className="h-6 w-6" />
-                            </div>
-                            <p className="text-3xl font-bold text-gray-900 leading-none mb-1">{overview?.totalMigrants ?? "-"}</p>
-                            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Families Abroad</p>
-                            <p className="text-xs text-gray-500">{overview?.totalAdmins ?? "-"} admins</p>
-                        </div>
                     </div>
                 </div>
 

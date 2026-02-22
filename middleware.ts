@@ -23,7 +23,9 @@ export default withAuth(
 
         // Authenticated landing: send users to their portal from root
         if (isAuth && req.nextUrl.pathname === "/") {
-            if (token?.role === "ADMIN") {
+            // Let the client-side handle the redirect or keep them on landing page
+            // But if we want to auto-redirect logged in users away from landing:
+             if (token?.role === "ADMIN") {
                 return NextResponse.redirect(new URL("/admin", req.url));
             }
             if (token?.role === "CARER") {
@@ -33,6 +35,11 @@ export default withAuth(
         }
 
         if (!isAuth) {
+            // Allow access to landing page
+            if (req.nextUrl.pathname === "/") {
+                return NextResponse.next();
+            }
+
             let from = req.nextUrl.pathname;
             if (req.nextUrl.search) {
                 from += req.nextUrl.search;
@@ -68,5 +75,6 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: ["/", "/dashboard/:path*", "/carer/:path*", "/admin/:path*", "/signin", "/signup"],
+    // Exclude root path '/' from middleware matching
+    matcher: ["/dashboard/:path*", "/carer/:path*", "/admin/:path*", "/signin", "/signup"],
 };

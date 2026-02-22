@@ -1,7 +1,8 @@
-const CACHE_NAME = "kera-pwa-v2";
+const CACHE_NAME = "kera-pwa-v3";
 const ASSETS = ["/", "/pricing", "/signin", "/signup", "/favicon.ico", "/pwa-icon.svg"];
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
@@ -11,16 +12,19 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-          return undefined;
-        })
-      )
-    )
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              return caches.delete(key);
+            }
+            return undefined;
+          })
+        )
+      ),
+    ])
   );
 });
 
