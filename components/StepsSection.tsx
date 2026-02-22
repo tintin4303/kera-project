@@ -10,9 +10,6 @@ interface StepCardProps {
 
 const StepCard: React.FC<StepCardProps> = ({ title, icon: Icon, steps, colorClass }) => (
     <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 flex flex-col h-full hover:shadow-xl transition-shadow">
-        <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-6 ${colorClass} bg-opacity-10`}>
-            <Icon className={`w-8 h-8 ${colorClass.replace('bg-', 'text-')}`} />
-        </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-6">{title}</h3>
         <ul className="space-y-4 grow">
             {steps.map((step, index) => (
