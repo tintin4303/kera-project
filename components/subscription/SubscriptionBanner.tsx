@@ -11,10 +11,20 @@ export default function SubscriptionBanner() {
     useEffect(() => {
         const checkSubscription = async () => {
             try {
-                const res = await fetch('/api/subscriptions/current');
+                const res = await fetch('/api/patients');
                 if (res.ok) {
-                    const data = await res.json();
-                    setIsActive(data.active);
+                    const patients = await res.json();
+
+                    // If no patients, we don't need the "missing subscription" banner yet
+                    // as subscription is bundled with adding a patient now.
+                    if (patients.length === 0) {
+                        setIsActive(true); // Hide banner
+                        return;
+                    }
+
+                    // Check if all patients have an active subscription
+                    const allActive = patients.every((p: any) => p.subscription?.status === 'ACTIVE');
+                    setIsActive(allActive);
                 }
             } catch (error) {
                 console.error('Failed to check subscription:', error);

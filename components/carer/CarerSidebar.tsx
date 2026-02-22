@@ -2,8 +2,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, MessageSquare, Calendar, LogOut, User } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
+import { Home, Users, MessageSquare, Calendar, User } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import { useLanguage } from '@/components/LanguageContext';
 
 export const carerNavigation = [
@@ -19,20 +19,6 @@ export default function CarerSidebar() {
     const { data: session } = useSession();
     const { t } = useLanguage();
 
-    const handleSignOut = async () => {
-        await signOut({ redirect: false });
-        if (typeof window !== "undefined") {
-            if ("caches" in window) {
-                const keys = await caches.keys();
-                await Promise.all(keys.map((key) => caches.delete(key)));
-            }
-            if ("serviceWorker" in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(registrations.map((registration) => registration.unregister()));
-            }
-            window.location.href = "/signin";
-        }
-    };
 
     return (
         <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200">
@@ -75,24 +61,17 @@ export default function CarerSidebar() {
                 </nav>
             </div>
 
-            {/* User Profile & Logout */}
+            {/* User Profile */}
             <div className="shrink-0 flex border-t border-gray-200 p-4">
                 <div className="flex items-center w-full">
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-700 truncate">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                             {session?.user?.name || 'Carer'}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
                             {session?.user?.email}
                         </p>
                     </div>
-                    <button
-                        onClick={handleSignOut}
-                        className="ml-3 p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
-                        title={t('profile.signout')}
-                    >
-                        <LogOut className="h-5 w-5" />
-                    </button>
                 </div>
             </div>
         </div>

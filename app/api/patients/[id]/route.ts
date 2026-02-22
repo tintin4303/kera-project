@@ -19,6 +19,16 @@ export async function GET(
         const patient = await prisma.patient.findUnique({
             where: { id },
             include: {
+                carer: {
+                    include: {
+                        user: {
+                            select: {
+                                name: true,
+                                image: true,
+                            }
+                        }
+                    }
+                },
                 healthRecords: {
                     orderBy: { recordedAt: 'desc' },
                     take: 5

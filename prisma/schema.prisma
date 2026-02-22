@@ -127,6 +127,7 @@ model Patient {
   updatedAt   DateTime @updatedAt
 
   serviceRequests ServiceRequest[]
+  subscription    Subscription?
 }
 
 model HealthRecord {
@@ -231,6 +232,10 @@ model Subscription {
   id          String             @id @default(cuid())
   userId      String
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  patientId   String?            // The patient this subscription is for
+  patient     Patient?           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  
   packageId   String
   package     Package            @relation(fields: [packageId], references: [id])
   
@@ -243,6 +248,8 @@ model Subscription {
   
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+
+  @@unique([patientId]) // Each patient should have at most one active subscription record in this model (simplified for now)
 }
 
 enum PaymentStatus {

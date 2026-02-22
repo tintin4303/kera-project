@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { MapPin, Activity, Heart, Calendar, Clock } from 'lucide-react';
+import { MapPin, Activity, Heart, Calendar, Clock, User } from 'lucide-react';
 import MoodBadge from '@/components/MoodBadge';
 import Modal from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -18,6 +18,12 @@ interface Patient {
     healthRecords: HealthRecord[];
     appointments: Appointment[];
     medications: Medication[];
+    carer?: {
+        user: {
+            name: string;
+            image?: string | null;
+        }
+    } | null;
 }
 
 interface HealthRecord {
@@ -146,7 +152,7 @@ export default function PatientDetailsPage() {
                         </div>
                     </div>
                     <div className="mt-3 flex justify-center sm:mt-0">
-                        <button 
+                        <button
                             onClick={handleEditClick}
                             className="flex justify-center items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                         >
@@ -273,6 +279,38 @@ export default function PatientDetailsPage() {
                             )}
                         </div>
                     </div>
+
+                    {/* Assigned Carer */}
+                    <div className="bg-white shadow rounded-lg border border-gray-100">
+                        <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
+                                <User className="mr-2 h-5 w-5 text-kera-vibrant" />
+                                Assigned Carer
+                            </h3>
+                        </div>
+                        <div className="p-4">
+                            {patient.carer ? (
+                                <div className="flex items-center space-x-4">
+                                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 overflow-hidden">
+                                        {patient.carer.user.image ? (
+                                            <img src={patient.carer.user.image} alt={patient.carer.user.name} className="h-full w-full object-cover" />
+                                        ) : (
+                                            <User size={24} />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900">{patient.carer.user.name}</p>
+                                        <p className="text-xs text-kera-vibrant font-medium mt-0.5">Verified Professional</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-4">
+                                    <p className="text-sm text-gray-500 italic text-center">Assigning a carer...</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 text-center">Our team is matching a carer for {patient.name.split(' ')[0]}.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -288,7 +326,7 @@ export default function PatientDetailsPage() {
                         onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
                         required
                     />
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                         <Input
                             label="Date of Birth"

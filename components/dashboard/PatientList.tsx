@@ -9,6 +9,15 @@ interface Patient {
     name: string;
     city: string;
     country: string;
+    subscription?: {
+        status: string;
+    } | null;
+    carer?: {
+        user: {
+            name: string;
+            image?: string | null;
+        }
+    } | null;
     _count?: {
         healthRecords: number;
         appointments: number;
@@ -71,12 +80,17 @@ export default function PatientList() {
                                 {patient.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-kera-vibrant transition-colors">
-                                    {patient.name}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-kera-vibrant transition-colors">
+                                        {patient.name}
+                                    </p>
+                                </div>
                                 <p className="text-xs text-gray-500 truncate flex items-center mt-0.5">
                                     <MapPin className="h-3 w-3 mr-1" />
                                     {patient.city}, {patient.country}
+                                </p>
+                                <p className="text-[10px] text-kera-vibrant font-medium mt-1 truncate">
+                                    Carer: {patient.carer?.user.name || 'Assigning...'}
                                 </p>
                             </div>
                             <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-kera-vibrant transition-colors" />

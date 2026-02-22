@@ -14,7 +14,7 @@ export const dashboardNavigation = [
     { name: 'nav.profile', href: '/dashboard/profile', icon: User },
 ];
 
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 export default function DashboardSidebar() {
     const pathname = usePathname();
