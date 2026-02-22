@@ -66,6 +66,7 @@ const translations = {
         "nav.overview": "ခြုံငုံသုံးသပ်ချက်",
         "nav.appointments": "ချိန်းဆိုမှုများ",
         "nav.reports": "အစီရင်ခံစာများ",
+        "nav.services": "ဝန်ဆောင်မှုများ",
         "nav.view_profile": "ပရိုဖိုင်ကြည့်ရန်",
         "schedule.empty": "ချိန်းဆိုထားသော အချိန်ဇယားများ မရှိသေးပါ။",
         "common.loading": "ခေတ္တစောင့်ပါ...",
@@ -95,8 +96,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('kera-language', lang);
     };
 
-    const t = (key: string) => {
-        return translations[language][key as keyof typeof translations['en']] || key;
+    const t = (key: string): string => {
+        return (translations[language] as Record<string, string>)[key] ?? key;
     };
 
     return (
