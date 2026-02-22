@@ -21,7 +21,6 @@ interface Package {
 export default function PricingPage() {
     const { data: session } = useSession();
     const [packages, setPackages] = useState<Package[]>([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchPackages = async () => {
@@ -33,8 +32,6 @@ export default function PricingPage() {
                 }
             } catch (error) {
                 console.error('Failed to fetch packages:', error);
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -45,7 +42,7 @@ export default function PricingPage() {
     const defaultCorePlan = {
         id: 'core-plan',
         name: 'Core Plan',
-        price: 990000, // stored in cents/satang
+        price: 99000, // stored in cents/satang
         currency: 'THB',
         description: 'Everything needed for ongoing care across borders.',
         features: [
@@ -103,10 +100,10 @@ export default function PricingPage() {
                             </div>
 
                             {session ? (
-                                <SubscribeButton 
-                                    packageId={corePlan.id} 
-                                    price={corePlan.price} 
-                                    currency={corePlan.currency} 
+                                <SubscribeButton
+                                    packageId={corePlan.id}
+                                    price={corePlan.price}
+                                    currency={corePlan.currency}
                                 />
                             ) : (
                                 <Link
