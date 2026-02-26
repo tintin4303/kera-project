@@ -33,7 +33,7 @@ export default function DashboardLayout({
             <DashboardSidebar />
 
             <MobileBottomNav items={dashboardNavigation.filter(item =>
-                ['nav.overview', 'nav.appointments', 'nav.chat', 'nav.profile'].includes(item.name)
+                ['nav.overview', 'nav.schedule', 'nav.chat', 'nav.profile'].includes(item.name)
             )} />
 
             <div className="md:pl-64 flex flex-col min-h-screen">

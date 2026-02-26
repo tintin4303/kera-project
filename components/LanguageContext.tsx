@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 type Language = 'en' | 'my';
 
@@ -28,9 +28,9 @@ const translations = {
         "nav.dashboard": "Dashboard",
         "nav.patients": "Patients",
         "nav.chat": "Chat",
-        "nav.schedule": "Schedule",
+        "nav.schedule": "Schedules",
         "nav.profile": "Profile",
-        "nav.overview": "Overview",
+        "nav.overview": "Family",
         "nav.appointments": "Appointments",
         "nav.reports": "Reports",
         "nav.services": "Services",
@@ -63,7 +63,7 @@ const translations = {
         "nav.chat": "စကားပြောရန်",
         "nav.schedule": "အချိန်ဇယား",
         "nav.profile": "ပရိုဖိုင်",
-        "nav.overview": "ခြုံငုံသုံးသပ်ချက်",
+        "nav.overview": "မိသားစု",
         "nav.appointments": "ချိန်းဆိုမှုများ",
         "nav.reports": "အစီရင်ခံစာများ",
         "nav.services": "ဝန်ဆောင်မှုများ",
@@ -82,14 +82,13 @@ const translations = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguage] = useState<Language>('en');
-
-    useEffect(() => {
-        const savedLang = localStorage.getItem('kera-language') as Language;
-        if (savedLang) {
-            setLanguage(savedLang);
+    const [language, setLanguage] = useState<Language>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('kera-language') as Language | null;
+            return saved ?? 'en';
         }
-    }, []);
+        return 'en';
+    });
 
     const handleSetLanguage = (lang: Language) => {
         setLanguage(lang);

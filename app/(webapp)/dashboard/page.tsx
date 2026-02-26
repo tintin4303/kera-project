@@ -1,10 +1,9 @@
 "use client";
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Activity, Bell, FileText, MessageSquare, UserPlus, Languages, Calendar } from 'lucide-react';
+import { Activity, Bell, FileText, MessageSquare, Languages, Calendar, Plus } from 'lucide-react';
 import AddPatientModal from '@/components/dashboard/AddPatientModal';
 import PatientList from '@/components/dashboard/PatientList';
-import { Button } from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 export default function DashboardOverview() {
     const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
@@ -12,14 +11,6 @@ export default function DashboardOverview() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex justify-end pb-2">
-                <Button onClick={() => setIsAddPatientModalOpen(true)} size="md">
-                    <UserPlus className="h-4 w-4" />
-                    Add Member
-                </Button>
-            </div>
-
             {/* Family Members List - Full Width */}
             <div className="space-y-4">
                 <PatientList key={refreshKey} />
@@ -27,80 +18,78 @@ export default function DashboardOverview() {
 
             <div className="space-y-4">
                 <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Core plan features</h2>
-                    <p className="text-sm text-gray-500">
-                        Everything included in your 990 THB plan is available in your portal.
-                    </p>
+                    <h2 className="text-lg font-semibold text-gray-900">Core plan features</h2>
+                    <p className="text-xs text-gray-500">Included with your 990 THB plan.</p>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
-                        <div className="flex flex-col h-full text-center">
-                            <div className="mx-auto rounded-xl bg-kera-vibrant/10 p-3 text-kera-vibrant mb-3 shadow-sm">
-                                <Activity className="h-6 w-6" />
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <Card hover padding="sm" className="border border-gray-100 bg-white/80 backdrop-blur rounded-2xl p-3">
+                        <div className="flex flex-col items-center">
+                            <div className="mx-auto rounded-lg bg-kera-vibrant/10 p-2.5 text-kera-vibrant">
+                                <Activity className="h-5 w-5" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Health Monitor</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Track vitals and trends.</p>
-                            <Link href="/dashboard" className="text-xs font-semibold text-kera-vibrant mt-3 py-1.5 bg-kera-vibrant/5 rounded-md w-full">
+                            <h3 className="mt-2 text-xs font-bold text-gray-900">Health Monitor</h3>
+                            <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 text-center">Track vitals and trends.</p>
+                            <Link href="/dashboard" className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-semibold text-kera-vibrant bg-kera-vibrant/5 rounded-full w-full">
                                 View
                             </Link>
                         </div>
                     </Card>
-                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
-                        <div className="flex flex-col h-full text-center">
-                            <div className="mx-auto rounded-xl bg-blue-100 p-3 text-blue-600 mb-3 shadow-sm">
-                                <Bell className="h-6 w-6" />
+                    <Card hover padding="sm" className="border border-gray-100 bg-white/80 backdrop-blur rounded-2xl p-3">
+                        <div className="flex flex-col items-center">
+                            <div className="mx-auto rounded-lg bg-blue-100 p-2.5 text-blue-600">
+                                <Bell className="h-5 w-5" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Reminders</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Track daily meds.</p>
-                            <Link href="/dashboard/appointments" className="text-xs font-semibold text-blue-600 mt-3 py-1.5 bg-blue-50 rounded-md w-full">
+                            <h3 className="mt-2 text-xs font-bold text-gray-900">Reminders</h3>
+                            <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 text-center">Track daily meds.</p>
+                            <Link href="/dashboard/appointments" className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-semibold text-blue-600 bg-blue-50 rounded-full w-full">
                                 Schedule
                             </Link>
                         </div>
                     </Card>
-                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
-                        <div className="flex flex-col h-full text-center">
-                            <div className="mx-auto rounded-xl bg-purple-100 p-3 text-purple-600 mb-3 shadow-sm">
-                                <FileText className="h-6 w-6" />
+                    <Card hover padding="sm" className="border border-gray-100 bg-white/80 backdrop-blur rounded-2xl p-3">
+                        <div className="flex flex-col items-center">
+                            <div className="mx-auto rounded-lg bg-purple-100 p-2.5 text-purple-600">
+                                <FileText className="h-5 w-5" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Reports</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Weekly care summaries.</p>
-                            <Link href="/dashboard/reports" className="text-xs font-semibold text-purple-600 mt-3 py-1.5 bg-purple-50 rounded-md w-full">
+                            <h3 className="mt-2 text-xs font-bold text-gray-900">Reports</h3>
+                            <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 text-center">Weekly care summaries.</p>
+                            <Link href="/dashboard/reports" className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-semibold text-purple-600 bg-purple-50 rounded-full w-full">
                                 View
                             </Link>
                         </div>
                     </Card>
-                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
-                        <div className="flex flex-col h-full text-center">
-                            <div className="mx-auto rounded-xl bg-teal-100 p-3 text-teal-600 mb-3 shadow-sm">
-                                <MessageSquare className="h-6 w-6" />
+                    <Card hover padding="sm" className="border border-gray-100 bg-white/80 backdrop-blur rounded-2xl p-3">
+                        <div className="flex flex-col items-center">
+                            <div className="mx-auto rounded-lg bg-teal-100 p-2.5 text-teal-600">
+                                <MessageSquare className="h-5 w-5" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Care Chat</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Chat with your carer.</p>
-                            <Link href="/dashboard/chat" className="text-xs font-semibold text-teal-600 mt-3 py-1.5 bg-teal-50 rounded-md w-full">
+                            <h3 className="mt-2 text-xs font-bold text-gray-900">Care Chat</h3>
+                            <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 text-center">Chat with your carer.</p>
+                            <Link href="/dashboard/chat" className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-semibold text-teal-600 bg-teal-50 rounded-full w-full">
                                 Message
                             </Link>
                         </div>
                     </Card>
-                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
-                        <div className="flex flex-col h-full text-center">
-                            <div className="mx-auto rounded-xl bg-amber-100 p-3 text-amber-600 mb-3 shadow-sm">
-                                <Calendar className="h-6 w-6" />
+                    <Card hover padding="sm" className="border border-gray-100 bg-white/80 backdrop-blur rounded-2xl p-3">
+                        <div className="flex flex-col items-center">
+                            <div className="mx-auto rounded-lg bg-amber-100 p-2.5 text-amber-600">
+                                <Calendar className="h-5 w-5" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Checkups</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Track home visits.</p>
-                            <Link href="/dashboard/appointments" className="text-xs font-semibold text-amber-600 mt-3 py-1.5 bg-amber-50 rounded-md w-full">
-                                Manage
+                            <h3 className="mt-2 text-xs font-bold text-gray-900">Checkups</h3>
+                            <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 text-center">Track home visits.</p>
+                            <Link href="/dashboard/appointments" className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-semibold text-amber-600 bg-amber-50 rounded-full w-full">
+                                View
                             </Link>
                         </div>
                     </Card>
-                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
-                        <div className="flex flex-col h-full text-center">
-                            <div className="mx-auto rounded-xl bg-gray-100 p-3 text-gray-700 mb-3 shadow-sm">
-                                <Languages className="h-6 w-6" />
+                    <Card hover padding="sm" className="border border-gray-100 bg-white/80 backdrop-blur rounded-2xl p-3">
+                        <div className="flex flex-col items-center">
+                            <div className="mx-auto rounded-lg bg-gray-100 p-2.5 text-gray-700">
+                                <Languages className="h-5 w-5" />
                             </div>
-                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Burmese UI</h3>
-                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Native translation.</p>
-                            <Link href="/dashboard/profile" className="text-xs font-semibold text-gray-700 mt-3 py-1.5 bg-gray-50 rounded-md w-full border border-gray-100">
+                            <h3 className="mt-2 text-xs font-bold text-gray-900">Burmese UI</h3>
+                            <p className="text-[11px] text-gray-500 mt-1 line-clamp-2 text-center">Native translation.</p>
+                            <Link href="/dashboard/profile" className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-[11px] font-semibold text-gray-700 bg-gray-50 rounded-full w-full border border-gray-100">
                                 Settings
                             </Link>
                         </div>
@@ -116,6 +105,17 @@ export default function DashboardOverview() {
                     setRefreshKey(prev => prev + 1);
                 }}
             />
+
+            {/* Floating Add Member Button (matches carer's Add Schedule) */}
+            <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-40">
+                <button
+                    onClick={() => setIsAddPatientModalOpen(true)}
+                    className="p-4 bg-kera-vibrant text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 hover:shadow-xl transition-all duration-200 ring-4 ring-white"
+                    aria-label="Add Member"
+                >
+                    <Plus className="h-6 w-6 relative z-10" />
+                </button>
+            </div>
         </div>
     );
 }

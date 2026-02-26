@@ -30,6 +30,8 @@ export default function AddScheduleModal({ isOpen, onClose, onSuccess }: AddSche
         notes: '',
         location: 'Home',
         recurring: false,
+        medicationName: '',
+        medicationDosage: '',
     });
 
     useEffect(() => {
@@ -69,7 +71,11 @@ export default function AddScheduleModal({ isOpen, onClose, onSuccess }: AddSche
                 body: JSON.stringify({
                     patientId: formData.patientId,
                     scheduledAt: scheduledAt.toISOString(),
-                    notes: `Service: ${formData.type}\nNotes: ${formData.notes}`,
+                    notes: `Service: ${formData.type}\n` +
+                        (formData.type === 'Medication Reminder'
+                            ? `Medication: ${formData.medicationName} (${formData.medicationDosage})\n`
+                            : '') +
+                        `Notes: ${formData.notes}`,
                     location: formData.location,
                     duration: 60,
                     recurring: formData.recurring
@@ -134,12 +140,39 @@ export default function AddScheduleModal({ isOpen, onClose, onSuccess }: AddSche
                             <option>Regular Checkup</option>
                             <option>Vitals Check</option>
                             <option>Medication Review</option>
+                            <option>Medication Reminder</option>
                             <option>Follow-up Visit</option>
                             <option>Initial Assessment</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
                     </div>
                 </div>
+
+                {/* Medication Details */}
+                {formData.type === 'Medication Reminder' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Medicine Name</label>
+                            <Input
+                                placeholder="e.g., Paracetamol"
+                                value={formData.medicationName}
+                                onChange={(e) => setFormData({ ...formData, medicationName: e.target.value })}
+                                className="h-10"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Dosage</label>
+                            <Input
+                                placeholder="e.g., 500mg"
+                                value={formData.medicationDosage}
+                                onChange={(e) => setFormData({ ...formData, medicationDosage: e.target.value })}
+                                className="h-10"
+                                required
+                            />
+                        </div>
+                    </div>
+                )}
 
                 {/* Date & Time */}
                 <div className="grid grid-cols-2 gap-4">
