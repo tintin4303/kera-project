@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User, Loader2, MessageSquare, Image, Paperclip, X } from 'lucide-react';
+import { Send, User, Loader2, MessageSquare, Image, X, ChevronLeft } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -31,6 +31,7 @@ export default function ChatInterface() {
     const [sending, setSending] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [showContacts, setShowContacts] = useState(true); // For mobile toggle
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +72,6 @@ export default function ChatInterface() {
 
         setSending(true);
         try {
-            // If there's a file, use the media upload endpoint
             if (selectedFile) {
                 const formData = new FormData();
                 formData.append('file', selectedFile);
@@ -93,7 +93,6 @@ export default function ChatInterface() {
                     setPreviewUrl(null);
                 }
             } else {
-                // Regular text message
                 const res = await fetch('/api/chat/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -119,21 +118,18 @@ export default function ChatInterface() {
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Validate file type
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
             if (!allowedTypes.includes(file.type)) {
                 alert('Invalid file type. Only images and videos are allowed.');
                 return;
             }
 
-            // Validate file size (max 10MB)
             if (file.size > 10 * 1024 * 1024) {
                 alert('File too large. Maximum size is 10MB.');
                 return;
             }
 
             setSelectedFile(file);
-            // Create preview URL for images
             if (file.type.startsWith('image/')) {
                 setPreviewUrl(URL.createObjectURL(file));
             } else {
@@ -150,9 +146,18 @@ export default function ChatInterface() {
         }
     };
 
+    const handleSelectContact = (contact: Contact) => {
+        setSelectedContact(contact);
+        setShowContacts(false);
+    };
+
+    const handleBackToContacts = () => {
+        setShowContacts(true);
+    };
+
     if (loadingContacts) {
         return (
-            <div className="flex items-center justify-center h-[600px] bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-center h-full bg-white">
                 <Loader2 className="h-8 w-8 animate-spin text-kera-vibrant" />
             </div>
         );
@@ -160,7 +165,7 @@ export default function ChatInterface() {
 
     if (contacts.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-[600px] bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+            <div className="flex flex-col items-center justify-center h-full bg-white p-6 text-center">
                 <div className="bg-gray-100 p-4 rounded-full mb-4">
                     <MessageSquare size={32} className="text-gray-400" />
                 </div>
@@ -173,17 +178,24 @@ export default function ChatInterface() {
     }
 
     return (
-        <div className="flex h-[75vh] min-h-[500px] bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex h-full bg-white md:rounded-xl md:border md:border-gray-100 overflow-hidden relative">
             {/* Contacts Sidebar */}
-            <div className="w-1/3 border-r border-gray-100 flex flex-col">
-                <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+            <div className={cn(
+                "w-full md:w-1/3 md:border-r border-gray-100 flex flex-col bg-white shrink-0",
+                showContacts ? "flex" : "hidden md:flex"
+            )}>
+                {/* Contacts Header */}
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between flex-shrink-0">
                     <h3 className="font-semibold text-gray-900">Care Connections</h3>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        {contacts.length}
+                    </span>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {contacts.map((contact) => (
                         <button
                             key={contact.id}
-                            onClick={() => setSelectedContact(contact)}
+                            onClick={() => handleSelectContact(contact)}
                             className={cn(
                                 "w-full flex items-center p-4 transition-colors hover:bg-gray-50",
                                 selectedContact?.id === contact.id ? "bg-kera-vibrant/5 border-r-2 border-kera-vibrant" : ""
@@ -198,7 +210,7 @@ export default function ChatInterface() {
                                     </div>
                                 )}
                             </div>
-                            <div className="ml-3 text-left overflow-hidden">
+                            <div className="ml-3 text-left overflow-hidden flex-1">
                                 <p className="text-sm font-semibold text-gray-900 truncate">{contact.name}</p>
                                 <p className="text-xs text-gray-500 capitalize">{contact.role.toLowerCase()}</p>
                             </div>
@@ -208,12 +220,23 @@ export default function ChatInterface() {
             </div>
 
             {/* Chat Window */}
-            <div className="flex-1 flex flex-col bg-white">
+            <div className={cn(
+                "flex-1 flex flex-col bg-white min-w-0 h-full",
+                showContacts ? "hidden md:flex" : "flex"
+            )}>
                 {selectedContact ? (
                     <>
-                        {/* Chat Header */}
-                        <div className="p-4 border-b border-gray-100 flex items-center bg-white">
-                            <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden">
+                        {/* Chat Header - Fixed */}
+                        <div className="h-14 px-4 border-b border-gray-100 flex items-center bg-white flex-shrink-0">
+                            {/* Back button for mobile */}
+                            <button
+                                onClick={handleBackToContacts}
+                                className="md:hidden mr-3 p-1 -ml-1 text-gray-500 hover:text-gray-700"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+
+                            <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                                 {selectedContact.image ? (
                                     <img src={selectedContact.image} alt={selectedContact.name} className="h-full w-full object-cover" />
                                 ) : (
@@ -222,67 +245,71 @@ export default function ChatInterface() {
                                     </div>
                                 )}
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-bold text-gray-900">{selectedContact.name}</p>
+                            <div className="ml-3 min-w-0">
+                                <p className="text-sm font-bold text-gray-900 truncate">{selectedContact.name}</p>
                                 <p className="text-[10px] text-green-500 font-medium">Online</p>
                             </div>
                         </div>
 
-                        {/* Messages Area */}
+                        {/* Messages Area - Scrollable */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30">
-                            {messages.map((msg) => {
-                                const isMe = msg.senderId === session?.user?.id;
-                                return (
-                                    <div
-                                        key={msg.id}
-                                        className={cn(
-                                            "flex w-full",
-                                            isMe ? "justify-end" : "justify-start"
-                                        )}
-                                    >
+                            {loadingMessages ? (
+                                <div className="flex items-center justify-center h-full">
+                                    <Loader2 className="h-6 w-6 animate-spin text-kera-vibrant" />
+                                </div>
+                            ) : (
+                                messages.map((msg) => {
+                                    const isMe = msg.senderId === session?.user?.id;
+                                    return (
                                         <div
+                                            key={msg.id}
                                             className={cn(
-                                                "max-w-[75%] px-4 py-2 rounded-2xl text-sm shadow-sm",
-                                                isMe
-                                                    ? "bg-kera-vibrant text-white rounded-tr-none"
-                                                    : "bg-white text-gray-900 border border-gray-100 rounded-tl-none"
+                                                "flex w-full",
+                                                isMe ? "justify-end" : "justify-start"
                                             )}
                                         >
-                                            {/* Media Display */}
-                                            {msg.mediaUrl && (
-                                                <div className="mb-2">
-                                                    {msg.mediaType === 'video' ? (
-                                                        <video
-                                                            src={msg.mediaUrl}
-                                                            controls
-                                                            className="rounded-lg max-w-full"
-                                                        />
-                                                    ) : (
-                                                        <img
-                                                            src={msg.mediaUrl}
-                                                            alt="Shared media"
-                                                            className="rounded-lg max-w-full"
-                                                        />
-                                                    )}
-                                                </div>
-                                            )}
-                                            {msg.content && <p>{msg.content}</p>}
-                                            <p className={cn(
-                                                "text-[10px] mt-1",
-                                                isMe ? "text-white/70" : "text-gray-400"
-                                            )}>
-                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
+                                            <div
+                                                className={cn(
+                                                    "max-w-[75%] px-4 py-2 rounded-2xl text-sm shadow-sm",
+                                                    isMe
+                                                        ? "bg-kera-vibrant text-white rounded-tr-none"
+                                                        : "bg-white text-gray-900 border border-gray-100 rounded-tl-none"
+                                                )}
+                                            >
+                                                {msg.mediaUrl && (
+                                                    <div className="mb-2">
+                                                        {msg.mediaType === 'video' ? (
+                                                            <video
+                                                                src={msg.mediaUrl}
+                                                                controls
+                                                                className="rounded-lg max-w-full"
+                                                            />
+                                                        ) : (
+                                                            <img
+                                                                src={msg.mediaUrl}
+                                                                alt="Shared media"
+                                                                className="rounded-lg max-w-full"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {msg.content && <p>{msg.content}</p>}
+                                                <p className={cn(
+                                                    "text-[10px] mt-1",
+                                                    isMe ? "text-white/70" : "text-gray-400"
+                                                )}>
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })
+                            )}
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area */}
-                        <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white">
-                            {/* File Preview */}
+                        {/* Input Area - Fixed */}
+                        <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white flex-shrink-0 mb-16 md:mb-0">
                             {selectedFile && (
                                 <div className="mb-3 relative inline-block">
                                     {previewUrl ? (
@@ -293,7 +320,7 @@ export default function ChatInterface() {
                                         />
                                     ) : (
                                         <div className="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
-                                            <span className="text-xs text-gray-500">Video selected</span>
+                                            <span className="text-xs text-gray-500">Video</span>
                                         </div>
                                     )}
                                     <button

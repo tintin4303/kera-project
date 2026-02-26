@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
+import { Role } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -69,17 +70,32 @@ export const authOptions: NextAuthOptions = {
             }
             return true;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.id = user.id;
                 token.role = user.role || 'MIGRANT'; // Default to MIGRANT if not set
+                // Map the NextAuth user image to token picture
+                if (user.image) {
+                    token.picture = user.image;
+                }
             }
+
+            // Handle profile updates
+            if (trigger === "update" && session?.user) {
+                if (session.user.name) token.name = session.user.name;
+                if (session.user.image) token.picture = session.user.image;
+            }
+
             return token;
         },
         async session({ session, token }) {
             if (token) {
-                session.user.id = token.id;
-                session.user.role = token.role;
+                session.user.id = token.id as string;
+                session.user.role = token.role as string;
+                // Ensure image is mapped back from token
+                if (token.picture) {
+                    session.user.image = token.picture as string;
+                }
             }
             return session;
         },

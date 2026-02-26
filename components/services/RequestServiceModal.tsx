@@ -101,9 +101,9 @@ export default function RequestServiceModal({ isOpen, onClose, service }: Reques
     };
 
     return (
-        <Modal 
-            isOpen={isOpen} 
-            onClose={onClose} 
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
             title={`Request ${service.name}`}
             size="md"
         >
@@ -201,6 +201,26 @@ export default function RequestServiceModal({ isOpen, onClose, service }: Reques
                                 value={formData.notes}
                                 onChange={handleChange}
                             />
+                        </div>
+                    </div>
+
+                    <div className="flex items-start bg-yellow-50 p-4 rounded-xl border border-yellow-100 mt-2">
+                        <div className="flex items-center h-5 mt-0.5">
+                            <input
+                                id="paymentConfirmation"
+                                name="paymentConfirmation"
+                                type="checkbox"
+                                required
+                                className="focus:ring-kera-vibrant h-4 w-4 text-kera-vibrant border-gray-300 rounded"
+                            />
+                        </div>
+                        <div className="ml-3 text-sm">
+                            <label htmlFor="paymentConfirmation" className="font-bold text-gray-900">
+                                Payment Confirmation
+                            </label>
+                            <p className="text-gray-600 mt-1 leading-relaxed">
+                                I confirm requesting this service for <span className="font-bold text-kera-vibrant">{formatPrice(service.price, service.currency)}</span>. This amount will be charged to my account.
+                            </p>
                         </div>
                     </div>
 

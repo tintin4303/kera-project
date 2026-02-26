@@ -1,14 +1,17 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import { useLanguage } from '@/components/LanguageContext';
-import { User } from 'lucide-react';
+import { User, Loader2 } from 'lucide-react';
 
 export default function ProfilePage() {
     const { data: session, update } = useSession();
     const { t, language, setLanguage } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -46,20 +49,53 @@ export default function ProfilePage() {
         }
     };
 
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Only JPEG, PNG, and WebP are allowed.');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File too large. Maximum size is 5MB.');
+                return;
+            }
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         try {
+            const submitData = new FormData();
+            submitData.append('name', formData.name);
+            submitData.append('email', formData.email);
+            if (selectedFile) {
+                submitData.append('file', selectedFile);
+            }
+
             const res = await fetch('/api/profile', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: submitData, // Send as form data
             });
 
             if (res.ok) {
                 const updatedUser = await res.json();
-                await update({ ...session, user: { ...session?.user, name: updatedUser.name, email: updatedUser.email } });
+                await update({
+                    ...session,
+                    user: {
+                        ...session?.user,
+                        name: updatedUser.name,
+                        email: updatedUser.email,
+                        ...(updatedUser.image && { image: updatedUser.image })
+                    }
+                });
                 alert('Profile updated successfully!');
+                setSelectedFile(null);
+                setPreviewUrl(null);
             } else {
                 alert('Failed to update profile.');
             }
@@ -86,7 +122,13 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading) return <div>{t('common.loading')}</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-kera-vibrant" />
+        </div>
+    );
+
+    const displayImage = previewUrl || session?.user?.image;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
@@ -100,9 +142,9 @@ export default function ProfilePage() {
                     {/* Avatar Section */}
                     <div className="flex items-center space-x-6">
                         <div className="shrink-0">
-                            <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-2xl font-bold overflow-hidden">
-                                {session?.user?.image ? (
-                                    <img src={session.user.image} alt="Profile" className="h-full w-full object-cover" />
+                            <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-2xl font-bold overflow-hidden border-2 border-transparent hover:border-kera-vibrant transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                {displayImage ? (
+                                    <img src={displayImage} alt="Profile" className="h-full w-full object-cover" />
                                 ) : (
                                     <User className="h-8 w-8 text-gray-400" />
                                 )}
@@ -111,9 +153,25 @@ export default function ProfilePage() {
                         <div>
                             <h3 className="text-lg font-medium text-gray-900">{t('profile.photo')}</h3>
                             <div className="mt-2 flex space-x-3">
-                                <button type="button" className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kera-vibrant">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="hidden"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kera-vibrant"
+                                >
                                     {t('profile.change')}
                                 </button>
+                                {previewUrl && (
+                                    <span className="inline-flex items-center text-sm text-green-600 font-medium">
+                                        Image selected
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -123,13 +181,13 @@ export default function ProfilePage() {
                             <div className="sm:col-span-6">
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t('profile.name')}</label>
                                 <div className="mt-1">
-                                    <input 
-                                        type="text" 
-                                        name="name" 
-                                        id="name" 
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        id="name"
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="shadow-sm focus:ring-kera-vibrant focus:border-kera-vibrant block w-full sm:text-sm border-gray-300 rounded-md p-2 border" 
+                                        className="shadow-sm focus:ring-kera-vibrant focus:border-kera-vibrant block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
                                     />
                                 </div>
                             </div>
@@ -137,13 +195,13 @@ export default function ProfilePage() {
                             <div className="sm:col-span-6">
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">{t('profile.email')}</label>
                                 <div className="mt-1">
-                                    <input 
-                                        id="email" 
-                                        name="email" 
-                                        type="email" 
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="shadow-sm focus:ring-kera-vibrant focus:border-kera-vibrant block w-full sm:text-sm border-gray-300 rounded-md p-2 border" 
+                                        className="shadow-sm focus:ring-kera-vibrant focus:border-kera-vibrant block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
                                     />
                                 </div>
                             </div>
@@ -151,9 +209,9 @@ export default function ProfilePage() {
                             <div className="sm:col-span-6">
                                 <label htmlFor="language" className="block text-sm font-medium text-gray-700">{t('profile.language')}</label>
                                 <div className="mt-1">
-                                    <select 
-                                        id="language" 
-                                        name="language" 
+                                    <select
+                                        id="language"
+                                        name="language"
                                         value={language}
                                         onChange={handleChange}
                                         className="shadow-sm focus:ring-kera-vibrant focus:border-kera-vibrant block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
@@ -163,10 +221,10 @@ export default function ProfilePage() {
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div className="sm:col-span-6 text-right">
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     disabled={saving}
                                     className="bg-kera-vibrant border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-[#00a855] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kera-vibrant disabled:opacity-50"
                                 >
