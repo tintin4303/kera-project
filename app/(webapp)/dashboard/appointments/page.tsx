@@ -60,12 +60,7 @@ export default function AppointmentsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-bold text-gray-900">Health Visits</h1>
-                <p className="text-sm text-gray-500">
-                    View scheduled checkups and visits managed by your carer.
-                </p>
-            </div>
+
 
             {/* Tabs */}
             <div className="flex bg-gray-100 p-1 rounded-xl">

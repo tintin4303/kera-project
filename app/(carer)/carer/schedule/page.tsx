@@ -64,6 +64,7 @@ export default function CarerSchedulePage() {
 
     return (
         <div className="space-y-6 pb-20 md:pb-6">
+
             <AddScheduleModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

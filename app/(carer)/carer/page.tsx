@@ -28,7 +28,7 @@ export default function CarerDashboard() {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Overview</h2>
+
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

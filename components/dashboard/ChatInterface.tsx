@@ -32,6 +32,7 @@ export default function ChatInterface() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [showContacts, setShowContacts] = useState(true); // For mobile toggle
+    const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isFirstLoad = useRef(true);
@@ -199,31 +200,43 @@ export default function ChatInterface() {
                 "w-full md:w-1/3 md:border-r border-gray-100 flex flex-col bg-white shrink-0",
                 showContacts ? "flex" : "hidden md:flex"
             )}>
+                {/* Search Bar */}
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
+                    <input
+                        type="text"
+                        placeholder="Search connections..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant transition-all"
+                    />
+                </div>
                 <div className="flex-1 overflow-y-auto">
-                    {contacts.map((contact) => (
-                        <button
-                            key={contact.id}
-                            onClick={() => handleSelectContact(contact)}
-                            className={cn(
-                                "w-full flex items-center p-4 transition-colors hover:bg-gray-50",
-                                selectedContact?.id === contact.id ? "bg-kera-vibrant/5 border-r-2 border-kera-vibrant" : ""
-                            )}
-                        >
-                            <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
-                                {contact.image ? (
-                                    <img src={contact.image} alt={contact.name} className="h-full w-full object-cover" />
-                                ) : (
-                                    <div className="h-full w-full flex items-center justify-center text-gray-500 font-bold">
-                                        {contact.name.charAt(0)}
-                                    </div>
+                    {contacts
+                        .filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((contact) => (
+                            <button
+                                key={contact.id}
+                                onClick={() => handleSelectContact(contact)}
+                                className={cn(
+                                    "w-full flex items-center p-4 transition-colors hover:bg-gray-50",
+                                    selectedContact?.id === contact.id ? "bg-kera-vibrant/5 border-r-2 border-kera-vibrant" : ""
                                 )}
-                            </div>
-                            <div className="ml-3 text-left overflow-hidden flex-1">
-                                <p className="text-sm font-semibold text-gray-900 truncate">{contact.name}</p>
-                                <p className="text-xs text-gray-500 capitalize">{contact.role.toLowerCase()}</p>
-                            </div>
-                        </button>
-                    ))}
+                            >
+                                <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                                    {contact.image ? (
+                                        <img src={contact.image} alt={contact.name} className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="h-full w-full flex items-center justify-center text-gray-500 font-bold">
+                                            {contact.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="ml-3 text-left overflow-hidden flex-1">
+                                    <p className="text-sm font-semibold text-gray-900 truncate">{contact.name}</p>
+                                    <p className="text-xs text-gray-500 capitalize">{contact.role.toLowerCase()}</p>
+                                </div>
+                            </button>
+                        ))}
                 </div>
             </div>
 
