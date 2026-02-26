@@ -68,83 +68,80 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions);
         if (!session?.user?.id) return new NextResponse("Unauthorized", { status: 401 });
 
+        // Only Carers can create schedules now
+        if (session.user.role !== 'CARER') {
+            return new NextResponse("Forbidden: Only caretakers can set schedules", { status: 403 });
+        }
+
         const body = await req.json();
-        const { patientId, carerId, scheduledAt, duration, notes, location } = body;
+        const { patientId, scheduledAt, duration, notes, location, recurring } = body;
 
         if (!patientId || !scheduledAt) {
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Verify patient ownership (if Migrant)
-        if (session.user.role !== 'CARER') {
-            const patient = await prisma.patient.findUnique({
-                where: { id: patientId },
-                select: { userId: true }
-            });
-            if (!patient || patient.userId !== session.user.id) {
-                return new NextResponse("Forbidden: You allow only schedule for your own family", { status: 403 });
-            }
-        }
-
-        const appointmentStart = new Date(scheduledAt);
         const appointmentDuration = duration || 60;
-        const appointmentEnd = new Date(appointmentStart.getTime() + appointmentDuration * 60000);
+        const baseDate = new Date(scheduledAt);
+        const appointmentsToCreate = [];
 
-        // Conflict Detection: Check for overlapping appointments for this patient
-        // We fetch appointments around the requested time to check for overlaps
-        // Optimization: Filter by day to reduce data fetched
-        const startOfDay = new Date(appointmentStart);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(appointmentStart);
-        endOfDay.setHours(23, 59, 59, 999);
+        // If recurring is true, create 4 appointments (once a week)
+        const count = recurring ? 4 : 1;
 
-        const existingAppointments = await prisma.appointment.findMany({
-            where: {
-                status: { not: 'CANCELLED' },
-                scheduledAt: {
-                    gte: startOfDay,
-                    lte: endOfDay
-                },
-                OR: [
-                    { patientId },
-                    carerId ? { carerId } : {}
-                ]
-            }
-        });
+        for (let i = 0; i < count; i++) {
+            const date = new Date(baseDate);
+            date.setDate(date.getDate() + (i * 7));
 
-        const hasConflict = existingAppointments.some(appt => {
-            const apptStart = new Date(appt.scheduledAt);
-            const apptEnd = new Date(apptStart.getTime() + appt.duration * 60000);
-
-            // Check overlap: (StartA < EndB) and (EndA > StartB)
-            const isOverlapping = (appointmentStart < apptEnd && appointmentEnd > apptStart);
-
-            if (!isOverlapping) return false;
-
-            // Identify the type of conflict
-            if (appt.patientId === patientId) return true; // Patient is busy
-            if (carerId && appt.carerId === carerId) return true; // Carer is busy
-
-            return false;
-        });
-
-        if (hasConflict) {
-            return new NextResponse("Time slot already booked for this patient or carer", { status: 409 });
+            appointmentsToCreate.push({
+                patientId,
+                carerId: session.user.id,
+                scheduledAt: date,
+                duration: appointmentDuration,
+                status: 'SCHEDULED' as AppointmentStatus,
+                notes: notes + (recurring ? ` (Weekly Checkup ${i + 1}/4)` : ""),
+                location
+            });
         }
 
-        const appointment = await prisma.appointment.create({
-            data: {
-                patientId,
-                carerId: carerId || null, // Can be unassigned initially?
-                scheduledAt: new Date(scheduledAt),
-                duration: duration || 60,
-                status: 'PENDING',
-                notes,
-                location
-            }
-        });
+        // Check for conflicts for all appointments
+        for (const appt of appointmentsToCreate) {
+            const startOfDay = new Date(appt.scheduledAt);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(appt.scheduledAt);
+            endOfDay.setHours(23, 59, 59, 999);
 
-        return NextResponse.json(appointment);
+            const existingAppointments = await prisma.appointment.findMany({
+                where: {
+                    status: { not: 'CANCELLED' },
+                    scheduledAt: {
+                        gte: startOfDay,
+                        lte: endOfDay
+                    },
+                    OR: [
+                        { patientId: appt.patientId },
+                        { carerId: appt.carerId }
+                    ]
+                }
+            });
+
+            const apptEnd = new Date(appt.scheduledAt.getTime() + appt.duration * 60000);
+
+            const hasConflict = existingAppointments.some(existing => {
+                const exStart = new Date(existing.scheduledAt);
+                const exEnd = new Date(exStart.getTime() + existing.duration * 60000);
+                return (appt.scheduledAt < exEnd && apptEnd > exStart);
+            });
+
+            if (hasConflict) {
+                return new NextResponse(`Conflict found for date: ${appt.scheduledAt.toLocaleDateString()}`, { status: 409 });
+            }
+        }
+
+        // Bulk create (Prisma doesn't have createMany for all DBs easily, so we use multiple creates in a transaction)
+        const created = await prisma.$transaction(
+            appointmentsToCreate.map(data => prisma.appointment.create({ data }))
+        );
+
+        return NextResponse.json(created[0]); // Return the first or a summary
     } catch (error) {
         console.error("[APPOINTMENTS_POST]", error);
         return new NextResponse("Internal Error", { status: 500 });
