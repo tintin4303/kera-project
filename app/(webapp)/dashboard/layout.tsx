@@ -31,6 +31,7 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-gray-50 font-outfit pb-16 md:pb-0">
             <DashboardSidebar />
+
             <MobileBottomNav items={dashboardNavigation.filter(item =>
                 ['nav.overview', 'nav.appointments', 'nav.chat', 'nav.profile'].includes(item.name)
             )} />

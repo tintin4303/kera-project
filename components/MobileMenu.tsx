@@ -30,7 +30,7 @@ export default function MobileMenu({ isOpen, onClose, items, user }: MobileMenuP
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] md:hidden">
+        <div className="fixed inset-0 z-100 md:hidden">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"

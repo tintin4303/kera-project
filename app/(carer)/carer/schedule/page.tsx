@@ -64,20 +64,6 @@ export default function CarerSchedulePage() {
 
     return (
         <div className="space-y-6 pb-20 md:pb-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Your Schedule</h1>
-                    <p className="text-sm text-gray-500">Manage your patient visits and checkups.</p>
-                </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="p-3 bg-kera-vibrant text-white rounded-full shadow-lg hover:scale-105 transition-transform"
-                    aria-label="Add Schedule"
-                >
-                    <Plus className="h-6 w-6" />
-                </button>
-            </div>
-
             <AddScheduleModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -181,6 +167,16 @@ export default function CarerSchedulePage() {
                     )}
                 </div>
             )}
+            {/* Floating Add Button */}
+            <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-40">
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="p-4 bg-kera-vibrant text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 hover:shadow-xl transition-all duration-200 ring-4 ring-white"
+                    aria-label="Add Schedule"
+                >
+                    <Plus className="h-6 w-6 relative z-10" />
+                </button>
+            </div>
         </div>
     );
 }

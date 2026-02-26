@@ -34,6 +34,7 @@ export default function ChatInterface() {
     const [showContacts, setShowContacts] = useState(true); // For mobile toggle
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const isFirstLoad = useRef(true);
 
     const { data: contacts = [], isLoading: loadingContacts } = useQuery<Contact[]>({
         queryKey: ['chat-contacts'],
@@ -50,6 +51,11 @@ export default function ChatInterface() {
         }
     }, [contacts, selectedContact]);
 
+    // Reset first load flag when contact changes
+    useEffect(() => {
+        isFirstLoad.current = true;
+    }, [selectedContact?.id]);
+
     const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
         queryKey: ['chat-messages', selectedContact?.id],
         queryFn: async () => {
@@ -63,7 +69,16 @@ export default function ChatInterface() {
     });
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messages.length > 0 && messagesEndRef.current) {
+            setTimeout(() => {
+                if (isFirstLoad.current) {
+                    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+                    isFirstLoad.current = false;
+                } else {
+                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
+            }, 100);
+        }
     }, [messages]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
@@ -184,13 +199,6 @@ export default function ChatInterface() {
                 "w-full md:w-1/3 md:border-r border-gray-100 flex flex-col bg-white shrink-0",
                 showContacts ? "flex" : "hidden md:flex"
             )}>
-                {/* Contacts Header */}
-                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between flex-shrink-0">
-                    <h3 className="font-semibold text-gray-900">Care Connections</h3>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {contacts.length}
-                    </span>
-                </div>
                 <div className="flex-1 overflow-y-auto">
                     {contacts.map((contact) => (
                         <button
@@ -222,7 +230,7 @@ export default function ChatInterface() {
             {/* Chat Window */}
             <div className={cn(
                 "flex-1 flex flex-col bg-white min-w-0 h-full",
-                showContacts ? "hidden md:flex" : "flex"
+                showContacts ? "hidden md:flex" : "flex fixed inset-0 z-60 md:static md:z-auto"
             )}>
                 {selectedContact ? (
                     <>

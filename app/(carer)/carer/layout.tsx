@@ -11,6 +11,7 @@ export default function CarerDashboardLayout({
     return (
         <div className="min-h-screen bg-gray-50 font-outfit pb-16 md:pb-0">
             <CarerSidebar />
+
             <MobileBottomNav items={carerNavigation.filter(item =>
                 ['nav.dashboard', 'nav.patients', 'nav.schedule', 'nav.chat'].includes(item.name)
             )} />

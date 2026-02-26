@@ -78,7 +78,6 @@ export default function CarerDashboard() {
             {/* Assigned Patients */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">My Patients</h2>
                     <Link href="/carer/patients">
                         <Button variant="ghost" size="sm">View All</Button>
                     </Link>

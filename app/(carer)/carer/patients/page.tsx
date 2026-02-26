@@ -30,16 +30,6 @@ export default function CarerPatients() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">My Patients</h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Patients assigned to your care
-                    </p>
-                </div>
-            </div>
-
             {/* Patient List */}
             {loading ? (
                 <div className="flex items-center justify-center py-12">
