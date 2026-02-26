@@ -309,7 +309,7 @@ export default function ChatInterface() {
                         </div>
 
                         {/* Input Area - Fixed */}
-                        <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white flex-shrink-0 mb-16 md:mb-0">
+                        <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white flex-shrink-0 md:mb-0">
                             {selectedFile && (
                                 <div className="mb-3 relative inline-block">
                                     {previewUrl ? (
