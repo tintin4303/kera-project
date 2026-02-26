@@ -151,7 +151,7 @@ export default function CarerPatientDetail() {
             {/* Patient Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                         {patient.name.charAt(0).toUpperCase()}
                     </div>
                     <div>

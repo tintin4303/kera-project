@@ -28,56 +28,39 @@ export default function CarerDashboard() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Carer Dashboard</h1>
-                <p className="mt-1 text-sm text-gray-500">
-                    Manage care for your assigned patients
-                </p>
-            </div>
+            <h2 className="text-lg font-semibold text-gray-900">Overview</h2>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Card>
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-accent p-3">
-                            <Users className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Assigned Patients</p>
-                            <p className="text-2xl font-bold text-gray-900">{patients.length}</p>
-                        </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <Card padding="sm" className="flex flex-col items-center justify-center text-center">
+                    <div className="rounded-full bg-accent p-2 mb-2">
+                        <Users className="h-5 w-5 text-primary" />
                     </div>
+                    <p className="text-xs font-medium text-gray-500">Patients</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">{patients.length}</p>
                 </Card>
 
-                <Card>
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-green-100 p-3">
-                            <Activity className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Records This Week</p>
-                            <p className="text-2xl font-bold text-gray-900">0</p>
-                        </div>
+                <Card padding="sm" className="flex flex-col items-center justify-center text-center">
+                    <div className="rounded-full bg-green-100 p-2 mb-2">
+                        <Activity className="h-5 w-5 text-green-600" />
                     </div>
+                    <p className="text-xs font-medium text-gray-500">Records</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">0</p>
                 </Card>
 
-                <Card>
-                    <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-blue-100 p-3">
-                            <Calendar className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Upcoming Visits</p>
-                            <p className="text-2xl font-bold text-gray-900">0</p>
-                        </div>
+                <Card padding="sm" className="flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1">
+                    <div className="rounded-full bg-blue-100 p-2 mb-2">
+                        <Calendar className="h-5 w-5 text-blue-600" />
                     </div>
+                    <p className="text-xs font-medium text-gray-500">Visits</p>
+                    <p className="text-xl font-bold text-gray-900 mt-1">0</p>
                 </Card>
             </div>
 
             {/* Assigned Patients */}
             <div>
                 <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">My Patients</h2>
                     <Link href="/carer/patients">
                         <Button variant="ghost" size="sm">View All</Button>
                     </Link>
@@ -96,29 +79,40 @@ export default function CarerDashboard() {
                         </p>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {patients.slice(0, 6).map((patient) => (
-                            <Link key={patient.id} href={`/carer/patient/${patient.id}`}>
-                                <Card hover padding="md" className="h-full cursor-pointer">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                                            {patient.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 truncate">
-                                                {patient.name}
-                                            </p>
-                                            <p className="text-xs text-gray-500 truncate">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 whitespace-nowrap">Patient</th>
+                                        <th className="px-4 py-3 whitespace-nowrap">Location</th>
+                                        <th className="px-4 py-3 text-right whitespace-nowrap">Records</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {patients.slice(0, 6).map((patient) => (
+                                        <tr key={patient.id} className="hover:bg-gray-50 transition-colors group">
+                                            <td className="px-4 py-3">
+                                                <Link href={`/carer/patient/${patient.id}`} className="flex items-center gap-3 w-max">
+                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
+                                                        {patient.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className="font-medium text-gray-900 group-hover:text-purple-600 transition-colors">
+                                                        {patient.name}
+                                                    </span>
+                                                </Link>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                                                 {patient.city}, {patient.country}
-                                            </p>
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                {patient._count?.healthRecords || 0} records
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        ))}
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
+                                                {patient._count?.healthRecords || 0}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>
@@ -126,31 +120,25 @@ export default function CarerDashboard() {
             {/* Quick Actions */}
             <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <Link href="/carer/patients">
-                        <Card hover padding="md" className="cursor-pointer">
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-full bg-purple-100 p-3">
+                        <Card hover padding="sm" className="cursor-pointer text-center h-full active:scale-[0.98] transition-all">
+                            <div className="flex flex-col items-center justify-center">
+                                <div className="rounded-full bg-purple-100 p-2 mb-2">
                                     <Plus className="h-5 w-5 text-purple-600" />
                                 </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-900">Log Vitals</p>
-                                    <p className="text-xs text-gray-500">Record patient health data</p>
-                                </div>
+                                <p className="text-sm font-bold text-gray-900">Log Vitals</p>
                             </div>
                         </Card>
                     </Link>
 
                     <Link href="/carer/appointments">
-                        <Card hover padding="md" className="cursor-pointer">
-                            <div className="flex items-center gap-3">
-                                <div className="rounded-full bg-blue-100 p-3">
+                        <Card hover padding="sm" className="cursor-pointer text-center h-full active:scale-[0.98] transition-all">
+                            <div className="flex flex-col items-center justify-center">
+                                <div className="rounded-full bg-blue-100 p-2 mb-2">
                                     <Calendar className="h-5 w-5 text-blue-600" />
                                 </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-900">Schedule Visit</p>
-                                    <p className="text-xs text-gray-500">Plan upcoming appointments</p>
-                                </div>
+                                <p className="text-sm font-bold text-gray-900">Schedule</p>
                             </div>
                         </Card>
                     </Link>

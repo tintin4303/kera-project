@@ -40,89 +40,77 @@ export default function DashboardOverview() {
                         Everything included in your 990 THB plan is available in your portal.
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <Card hover>
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-kera-vibrant/10 p-2 text-kera-vibrant">
-                                <Activity className="h-5 w-5" />
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
+                        <div className="flex flex-col h-full text-center">
+                            <div className="mx-auto rounded-xl bg-kera-vibrant/10 p-3 text-kera-vibrant mb-3 shadow-sm">
+                                <Activity className="h-6 w-6" />
                             </div>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Health monitoring</h3>
-                                <p className="text-xs text-gray-500 mt-1">Track vitals and trends for each patient.</p>
-                                <Link href="/dashboard" className="text-xs font-semibold text-kera-vibrant mt-2 inline-flex">
-                                    View patients
-                                </Link>
-                            </div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Health Monitor</h3>
+                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Track vitals and trends.</p>
+                            <Link href="/dashboard" className="text-xs font-semibold text-kera-vibrant mt-3 py-1.5 bg-kera-vibrant/5 rounded-md w-full">
+                                View
+                            </Link>
                         </div>
                     </Card>
-                    <Card hover>
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-blue-100 p-2 text-blue-600">
-                                <Bell className="h-5 w-5" />
+                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
+                        <div className="flex flex-col h-full text-center">
+                            <div className="mx-auto rounded-xl bg-blue-100 p-3 text-blue-600 mb-3 shadow-sm">
+                                <Bell className="h-6 w-6" />
                             </div>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Smart reminders</h3>
-                                <p className="text-xs text-gray-500 mt-1">Stay on top of medications and regular checkups.</p>
-                                <Link href="/dashboard/appointments" className="text-xs font-semibold text-kera-vibrant mt-2 inline-flex">
-                                    Schedule checkups
-                                </Link>
-                            </div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Reminders</h3>
+                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Track daily meds.</p>
+                            <Link href="/dashboard/appointments" className="text-xs font-semibold text-blue-600 mt-3 py-1.5 bg-blue-50 rounded-md w-full">
+                                Schedule
+                            </Link>
                         </div>
                     </Card>
-                    <Card hover>
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-purple-100 p-2 text-purple-600">
-                                <FileText className="h-5 w-5" />
+                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
+                        <div className="flex flex-col h-full text-center">
+                            <div className="mx-auto rounded-xl bg-purple-100 p-3 text-purple-600 mb-3 shadow-sm">
+                                <FileText className="h-6 w-6" />
                             </div>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Health reports</h3>
-                                <p className="text-xs text-gray-500 mt-1">Receive regular reports from carers.</p>
-                                <Link href="/dashboard/reports" className="text-xs font-semibold text-kera-vibrant mt-2 inline-flex">
-                                    View reports
-                                </Link>
-                            </div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Reports</h3>
+                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Weekly care summaries.</p>
+                            <Link href="/dashboard/reports" className="text-xs font-semibold text-purple-600 mt-3 py-1.5 bg-purple-50 rounded-md w-full">
+                                View
+                            </Link>
                         </div>
                     </Card>
-                    <Card hover>
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-teal-100 p-2 text-teal-600">
-                                <MessageSquare className="h-5 w-5" />
+                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
+                        <div className="flex flex-col h-full text-center">
+                            <div className="mx-auto rounded-xl bg-teal-100 p-3 text-teal-600 mb-3 shadow-sm">
+                                <MessageSquare className="h-6 w-6" />
                             </div>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Care chat</h3>
-                                <p className="text-xs text-gray-500 mt-1">Chat directly with your patient’s carer.</p>
-                                <Link href="/dashboard/chat" className="text-xs font-semibold text-kera-vibrant mt-2 inline-flex">
-                                    Open chat
-                                </Link>
-                            </div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Care Chat</h3>
+                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Chat with your carer.</p>
+                            <Link href="/dashboard/chat" className="text-xs font-semibold text-teal-600 mt-3 py-1.5 bg-teal-50 rounded-md w-full">
+                                Message
+                            </Link>
                         </div>
                     </Card>
-                    <Card hover>
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-amber-100 p-2 text-amber-600">
-                                <Calendar className="h-5 w-5" />
+                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
+                        <div className="flex flex-col h-full text-center">
+                            <div className="mx-auto rounded-xl bg-amber-100 p-3 text-amber-600 mb-3 shadow-sm">
+                                <Calendar className="h-6 w-6" />
                             </div>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Regular checkups</h3>
-                                <p className="text-xs text-gray-500 mt-1">Track upcoming visits and schedules.</p>
-                                <Link href="/dashboard/appointments" className="text-xs font-semibold text-kera-vibrant mt-2 inline-flex">
-                                    Manage visits
-                                </Link>
-                            </div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Checkups</h3>
+                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Track home visits.</p>
+                            <Link href="/dashboard/appointments" className="text-xs font-semibold text-amber-600 mt-3 py-1.5 bg-amber-50 rounded-md w-full">
+                                Manage
+                            </Link>
                         </div>
                     </Card>
-                    <Card hover>
-                        <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-gray-100 p-2 text-gray-700">
-                                <Languages className="h-5 w-5" />
+                    <Card hover padding="sm" className="flex flex-col h-full active:scale-[0.98] transition-all">
+                        <div className="flex flex-col h-full text-center">
+                            <div className="mx-auto rounded-xl bg-gray-100 p-3 text-gray-700 mb-3 shadow-sm">
+                                <Languages className="h-6 w-6" />
                             </div>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Burmese UI</h3>
-                                <p className="text-xs text-gray-500 mt-1">Use the interface in Burmese for families in Myanmar.</p>
-                                <Link href="/dashboard/profile" className="text-xs font-semibold text-kera-vibrant mt-2 inline-flex">
-                                    Language settings
-                                </Link>
-                            </div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-tight">Burmese UI</h3>
+                            <p className="text-xs text-gray-500 mt-1.5 flex-1 line-clamp-2">Native translation.</p>
+                            <Link href="/dashboard/profile" className="text-xs font-semibold text-gray-700 mt-3 py-1.5 bg-gray-50 rounded-md w-full border border-gray-100">
+                                Settings
+                            </Link>
                         </div>
                     </Card>
                 </div>

@@ -44,32 +44,51 @@ export default function CarerPatients() {
                     </p>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {patients.map((patient) => (
-                        <Link key={patient.id} href={`/carer/patient/${patient.id}`}>
-                            <Card hover padding="md" className="h-full cursor-pointer">
-                                <div className="flex items-start gap-3">
-                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
-                                        {patient.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-gray-900 truncate">
-                                            {patient.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500 truncate">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+                                <tr>
+                                    <th className="px-4 py-3 whitespace-nowrap">Patient</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">Location</th>
+                                    <th className="px-4 py-3 text-right whitespace-nowrap">Records & Meds</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {patients.map((patient) => (
+                                    <tr key={patient.id} className="hover:bg-gray-50 transition-colors group">
+                                        <td className="px-4 py-3">
+                                            <Link href={`/carer/patient/${patient.id}`} className="flex items-center gap-3 w-max">
+                                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
+                                                    {patient.name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span className="font-medium text-gray-900 group-hover:text-primary transition-colors">
+                                                    {patient.name}
+                                                </span>
+                                            </Link>
+                                        </td>
+                                        <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                                             {patient.gender && `${patient.gender} • `}
                                             {patient.city}, {patient.country}
-                                        </p>
-                                        <div className="flex gap-3 mt-2 text-xs text-gray-400">
-                                            <span>{patient._count?.healthRecords || 0} records</span>
-                                            <span>•</span>
-                                            <span>{patient._count?.medications || 0} meds</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Link>
-                    ))}
+                                        </td>
+                                        <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-3 text-xs">
+                                                <span className="flex items-center gap-1" title="Health Records">
+                                                    <span className="text-gray-400">Records:</span>
+                                                    <span className="font-medium">{patient._count?.healthRecords || 0}</span>
+                                                </span>
+                                                <span className="text-gray-300">•</span>
+                                                <span className="flex items-center gap-1" title="Medications">
+                                                    <span className="text-gray-400">Meds:</span>
+                                                    <span className="font-medium">{patient._count?.medications || 0}</span>
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

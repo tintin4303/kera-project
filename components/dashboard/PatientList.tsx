@@ -67,50 +67,72 @@ export default function PatientList() {
     }
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {patients.map((patient) => (
-                <Link
-                    key={patient.id}
-                    href={`/dashboard/patient/${patient.id}`}
-                    className="block"
-                >
-                    <Card hover padding="md" className="h-full transition-all cursor-pointer group">
-                        <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                                {patient.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-kera-vibrant transition-colors">
-                                        {patient.name}
-                                    </p>
-                                </div>
-                                <p className="text-xs text-gray-500 truncate flex items-center mt-0.5">
-                                    <MapPin className="h-3 w-3 mr-1" />
-                                    {patient.city}, {patient.country}
-                                </p>
-                                <p className="text-[10px] text-kera-vibrant font-medium mt-1 truncate">
-                                    Carer: {patient.carer?.user.name || 'Assigning...'}
-                                </p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-kera-vibrant transition-colors" />
-                        </div>
-
-                        <div className="mt-4 pt-4 border-t border-gray-100 flex gap-4 text-xs text-gray-600">
-                            <div className="flex items-center gap-1">
-                                <Activity className="h-3.5 w-3.5 text-green-600" />
-                                <span className="font-medium">{patient._count?.healthRecords || 0}</span>
-                                <span className="text-gray-500">Records</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Calendar className="h-3.5 w-3.5 text-blue-600" />
-                                <span className="font-medium">{patient._count?.appointments || 0}</span>
-                                <span className="text-gray-500">Visits</span>
-                            </div>
-                        </div>
-                    </Card>
-                </Link>
-            ))}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+                        <tr>
+                            <th className="px-4 py-3 whitespace-nowrap">Family Member</th>
+                            <th className="px-4 py-3 whitespace-nowrap">Location</th>
+                            <th className="px-4 py-3 whitespace-nowrap">Carer</th>
+                            <th className="px-4 py-3 text-right whitespace-nowrap">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {patients.map((patient) => (
+                            <tr key={patient.id} className="hover:bg-gray-50 transition-colors group">
+                                <td className="px-4 py-3">
+                                    <Link href={`/dashboard/patient/${patient.id}`} className="flex items-center gap-3 w-max">
+                                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
+                                            {patient.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <span className="font-medium text-gray-900 group-hover:text-kera-vibrant transition-colors">
+                                            {patient.name}
+                                        </span>
+                                    </Link>
+                                </td>
+                                <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        {patient.city}, {patient.country}
+                                    </div>
+                                </td>
+                                <td className="px-4 py-3 whitespace-nowrap">
+                                    {patient.carer ? (
+                                        <div className="flex items-center gap-2">
+                                            {patient.carer.user.image ? (
+                                                <img src={patient.carer.user.image} alt="carer" className="w-6 h-6 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold">
+                                                    {patient.carer.user.name.charAt(0)}
+                                                </div>
+                                            )}
+                                            <span className="text-gray-900">{patient.carer.user.name}</span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 italic text-xs">Assigning...</span>
+                                    )}
+                                </td>
+                                <td className="px-4 py-3 text-right whitespace-nowrap">
+                                    <div className="flex items-center justify-end gap-3 text-xs text-gray-500">
+                                        <span className="flex items-center gap-1" title="Health Records">
+                                            <Activity className="h-3.5 w-3.5 text-green-600" />
+                                            {patient._count?.healthRecords || 0}
+                                        </span>
+                                        <span className="flex items-center gap-1" title="Visits">
+                                            <Calendar className="h-3.5 w-3.5 text-blue-600" />
+                                            {patient._count?.appointments || 0}
+                                        </span>
+                                        <Link href={`/dashboard/patient/${patient.id}`}>
+                                            <ChevronRight className="h-4 w-4 text-gray-400 ml-1 group-hover:text-kera-vibrant transition-colors" />
+                                        </Link>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
