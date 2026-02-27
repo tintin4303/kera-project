@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { MapPin, Activity, Heart, Calendar, Clock, User } from 'lucide-react';
 import MoodBadge from '@/components/MoodBadge';
 import Modal from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
@@ -148,7 +147,6 @@ export default function PatientDetailsPage() {
                                 {patient.dateOfBirth && ` • ${new Date(patient.dateOfBirth).toLocaleDateString()}`}
                             </p>
                             <div className="mt-1 flex items-center text-sm text-gray-500 justify-center sm:justify-start">
-                                <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0 text-gray-400" />
                                 {patient.city || t('patient.unknown_city')}, {patient.country || 'Myanmar'}
                             </div>
                         </div>
@@ -172,8 +170,7 @@ export default function PatientDetailsPage() {
                     {/* Recent Vitals */}
                     <div className="bg-white shadow rounded-lg border border-gray-100">
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100 flex justify-between items-center">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
-                                <Activity className="mr-2 h-5 w-5 text-kera-vibrant" />
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
                                 {t('patient.recent_records')}
                             </h3>
                         </div>
@@ -212,8 +209,7 @@ export default function PatientDetailsPage() {
                                 </table>
                             </div>
                         ) : (
-                            <div className="p-8 text-center text-gray-500 text-sm flex flex-col items-center">
-                                <Activity className="h-10 w-10 text-gray-300 mb-2" />
+                            <div className="p-8 text-center text-gray-500 text-sm">
                                 <p>{t('patient.no_records')}</p>
                             </div>
                         )}
@@ -222,8 +218,7 @@ export default function PatientDetailsPage() {
                     {/* Medications */}
                     <div className="bg-white shadow rounded-lg border border-gray-100">
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
-                                <Heart className="mr-2 h-5 w-5 text-red-500" />
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
                                 {t('patient.medications')}
                             </h3>
                         </div>
@@ -236,7 +231,7 @@ export default function PatientDetailsPage() {
                                                 <p className="font-medium text-gray-900">{med.name}</p>
                                                 <p className="text-xs text-gray-500">{med.dosage} • {med.frequency}</p>
                                             </div>
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                                                 {t('patient.active')}
                                             </span>
                                         </li>
@@ -253,8 +248,7 @@ export default function PatientDetailsPage() {
                 <div className="space-y-6">
                     <div className="bg-white shadow rounded-lg border border-gray-100">
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
-                                <Calendar className="mr-2 h-5 w-5 text-blue-500" />
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
                                 {t('patient.upcoming_visits')}
                             </h3>
                         </div>
@@ -262,12 +256,11 @@ export default function PatientDetailsPage() {
                             {patient.appointments && patient.appointments.length > 0 ? (
                                 <ul className="space-y-4">
                                     {patient.appointments.map((appt) => (
-                                        <li key={appt.id} className="border-l-4 border-blue-500 pl-3 py-1">
+                                        <li key={appt.id} className="pl-3 py-1">
                                             <p className="text-sm font-medium text-gray-900">
                                                 {new Date(appt.scheduledAt).toLocaleDateString()}
                                             </p>
-                                            <p className="text-xs text-gray-500 flex items-center mt-1">
-                                                <Clock className="h-3 w-3 mr-1" />
+                                            <p className="text-xs text-gray-500 mt-1">
                                                 {new Date(appt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                             <p className="text-sm text-gray-600 mt-1">{appt.notes || t('patient.routine_visit')}</p>
@@ -285,8 +278,7 @@ export default function PatientDetailsPage() {
                     {/* Assigned Carer */}
                     <div className="bg-white shadow rounded-lg border border-gray-100">
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
-                            <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
-                                <User className="mr-2 h-5 w-5 text-kera-vibrant" />
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
                                 {t('patient.assigned_carer')}
                             </h3>
                         </div>

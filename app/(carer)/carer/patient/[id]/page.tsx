@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Activity, Droplet, Heart, Plus, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -145,7 +144,7 @@ export default function CarerPatientDetail() {
             {/* Patient Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                    <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-2xl">
                         {patient.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -158,7 +157,6 @@ export default function CarerPatientDetail() {
                     </div>
                 </div>
                 <Button onClick={() => setIsLogModalOpen(true)} size="md">
-                    <Plus className="h-4 w-4" />
                     {t('carer_patient_detail.log_vitals')}
                 </Button>
             </div>
@@ -167,9 +165,6 @@ export default function CarerPatientDetail() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <Card>
                     <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-red-100 p-3">
-                            <Activity className="h-5 w-5 text-red-600" />
-                        </div>
                         <div className="flex-1">
                             <p className="text-xs font-medium text-gray-500">{t('carer_patient_detail.blood_pressure')}</p>
                             <p className="text-lg font-bold text-gray-900">
@@ -184,9 +179,6 @@ export default function CarerPatientDetail() {
 
                 <Card>
                     <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-blue-100 p-3">
-                            <Droplet className="h-5 w-5 text-blue-600" />
-                        </div>
                         <div className="flex-1">
                             <p className="text-xs font-medium text-gray-500">{t('carer_patient_detail.blood_glucose')}</p>
                             <p className="text-lg font-bold text-gray-900">
@@ -201,9 +193,6 @@ export default function CarerPatientDetail() {
 
                 <Card>
                     <div className="flex items-center gap-3">
-                        <div className="rounded-full bg-accent p-3">
-                            <Heart className="h-5 w-5 text-primary" />
-                        </div>
                         <div className="flex-1">
                             <p className="text-xs font-medium text-gray-500">{t('carer_patient_detail.active_medications')}</p>
                             <p className="text-lg font-bold text-gray-900">{activeMeds.length}</p>
@@ -218,8 +207,7 @@ export default function CarerPatientDetail() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('carer_patient_detail.recent_records')}</h2>
                 {records.length === 0 ? (
                     <Card className="text-center py-12">
-                        <Activity className="mx-auto h-12 w-12 text-gray-300" />
-                        <h3 className="mt-4 text-sm font-semibold text-gray-900">{t('carer_patient_detail.no_records')}</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">{t('carer_patient_detail.no_records')}</h3>
                         <p className="mt-1 text-sm text-gray-500">
                             {t('carer_patient_detail.log_vitals_info')}
                         </p>
@@ -278,7 +266,6 @@ export default function CarerPatientDetail() {
                         variant="secondary"
                         onClick={() => setIsAddMedicationModalOpen(true)}
                     >
-                        <Plus className="h-4 w-4 mr-1.5" />
                         {t('carer_patient_detail.add_medication')}
                     </Button>
                 </div>
@@ -311,7 +298,6 @@ export default function CarerPatientDetail() {
                         variant="secondary"
                         onClick={() => setIsAddReportModalOpen(true)}
                     >
-                        <Plus className="h-4 w-4 mr-1.5" />
                         {t('carer_patient_detail.create_report')}
                     </Button>
                 </div>
@@ -319,20 +305,15 @@ export default function CarerPatientDetail() {
                     <div className="space-y-3">
                         {reports.map((report) => (
                             <Card key={report.id} padding="md" hover>
-                                <div className="flex items-start gap-3">
-                                    <div className="rounded-full bg-teal-50 p-2.5 text-teal-600 mt-0.5">
-                                        <FileText className="h-5 w-5" />
+                                <div>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-semibold text-gray-900">{report.title}</p>
+                                        <p className="text-xs text-gray-500">{formatDate(report.createdAt)}</p>
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-sm font-semibold text-gray-900">{report.title}</p>
-                                            <p className="text-xs text-gray-500">{formatDate(report.createdAt)}</p>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {t('carer_patient_detail.period')} {new Date(report.periodStart).toLocaleDateString()} - {new Date(report.periodEnd).toLocaleDateString()}
-                                        </p>
-                                        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{report.summary}</p>
-                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {t('carer_patient_detail.period')} {new Date(report.periodStart).toLocaleDateString()} - {new Date(report.periodEnd).toLocaleDateString()}
+                                    </p>
+                                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">{report.summary}</p>
                                 </div>
                             </Card>
                         ))}
