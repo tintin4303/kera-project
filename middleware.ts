@@ -21,18 +21,11 @@ export default withAuth(
             return null;
         }
 
-        // Authenticated landing: send users to their portal from root
-        if (isAuth && req.nextUrl.pathname === "/") {
-            if (token?.role === "ADMIN") {
-                return NextResponse.redirect(new URL("/admin", req.url));
-            }
-            if (token?.role === "CARER") {
-                return NextResponse.redirect(new URL("/carer", req.url));
-            }
-            return NextResponse.redirect(new URL("/dashboard", req.url));
-        }
-
         if (!isAuth) {
+            // Allow unauthenticated access to the public landing page
+            if (req.nextUrl.pathname === "/") {
+                return NextResponse.next();
+            }
             let from = req.nextUrl.pathname;
             if (req.nextUrl.search) {
                 from += req.nextUrl.search;
@@ -68,5 +61,6 @@ export default withAuth(
 );
 
 export const config = {
-    matcher: ["/", "/dashboard/:path*", "/carer/:path*", "/admin/:path*", "/signin", "/signup"],
+    // Exclude "/" from matching so marketing landing page is always public
+    matcher: ["/dashboard/:path*", "/carer/:path*", "/admin/:path*", "/signin", "/signup"],
 };
