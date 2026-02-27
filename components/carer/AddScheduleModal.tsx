@@ -175,7 +175,7 @@ export default function AddScheduleModal({ isOpen, onClose, onSuccess }: AddSche
                 )}
 
                 {/* Date & Time */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="mb-1 block text-sm font-medium text-gray-700">Date</label>
                         <div className="relative">
@@ -185,7 +185,7 @@ export default function AddScheduleModal({ isOpen, onClose, onSuccess }: AddSche
                                 required
                                 value={formData.date}
                                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full rounded-lg border border-gray-300 pl-10 py-2 text-sm focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant outline-none"
+                                className="w-full rounded-lg border border-gray-300 pl-10 py-2.5 text-sm focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant outline-none"
                             />
                         </div>
                     </div>
@@ -198,7 +198,7 @@ export default function AddScheduleModal({ isOpen, onClose, onSuccess }: AddSche
                                 required
                                 value={formData.time}
                                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                className="w-full rounded-lg border border-gray-300 pl-10 py-2 text-sm focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant outline-none"
+                                className="w-full rounded-lg border border-gray-300 pl-10 py-2.5 text-sm focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant outline-none"
                             />
                         </div>
                     </div>

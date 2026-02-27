@@ -97,7 +97,7 @@ export default function AddReportModal({
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Period Start</label>
                         <div className="relative">
@@ -127,7 +127,7 @@ export default function AddReportModal({
                     <textarea
                         required
                         rows={4}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                        className="block w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant"
                         value={summary}
                         onChange={(e) => setSummary(e.target.value)}
                         placeholder="Detailed summary of the patient's condition and care provided..."
@@ -138,7 +138,7 @@ export default function AddReportModal({
                     <label className="block text-sm font-medium text-gray-700 mb-1">Recommendations (Optional)</label>
                     <textarea
                         rows={3}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                        className="block w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant"
                         value={recommendations}
                         onChange={(e) => setRecommendations(e.target.value)}
                         placeholder="Any suggestions for the family or future care..."
