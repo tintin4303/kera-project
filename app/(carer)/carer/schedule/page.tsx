@@ -152,9 +152,6 @@ export default function CarerSchedulePage() {
                                 ))
                             ) : (
                                 <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                                    <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                                        <CalendarIcon className="h-6 w-6 text-gray-300" />
-                                    </div>
                                     <h3 className="text-gray-900 font-medium">{t('carer_schedule.no_upcoming')}</h3>
                                     <p className="text-sm text-gray-500 mt-1">{t('carer_schedule.add_visit_desc')}</p>
                                     <button
