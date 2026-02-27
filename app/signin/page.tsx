@@ -55,7 +55,7 @@ function SignInInner() {
         <div className="min-h-screen bg-gray-50 flex flex-col font-outfit">
             <Navbar />
 
-            <main className="grow flex items-center justify-center pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+            <main className="grow flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
 
                     {/* Header */}
