@@ -289,7 +289,7 @@ export default function PatientDetailsPage() {
                                         {patient.carer.user.image ? (
                                             <img src={patient.carer.user.image} alt={patient.carer.user.name} className="h-full w-full object-cover" />
                                         ) : (
-                                            <User size={24} />
+                                            <div className="text-xs font-bold">{patient.carer.user.name.charAt(0)}</div>
                                         )}
                                     </div>
                                     <div>
