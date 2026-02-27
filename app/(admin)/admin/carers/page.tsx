@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import { ArrowLeft, RefreshCcw, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCcw, Loader2 } from 'lucide-react';
 
 interface Carer {
     id: string;
@@ -28,6 +27,7 @@ export default function AdminCarersPage() {
     const [carers, setCarers] = useState<Carer[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -74,6 +74,14 @@ export default function AdminCarersPage() {
         }
     };
 
+    const filteredCarers = carers.filter(carer => {
+        const searchLower = search.toLowerCase();
+        return (
+            carer.user.name?.toLowerCase().includes(searchLower) ||
+            carer.user.email?.toLowerCase().includes(searchLower)
+        );
+    });
+
     if (status === 'loading') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -105,6 +113,16 @@ export default function AdminCarersPage() {
                     </Button>
                 </div>
 
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        placeholder="Search by name or email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-300"
+                    />
+                </div>
+
                 {loading && carers.length === 0 ? (
                     <div className="flex justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-kera-vibrant" />
@@ -133,14 +151,14 @@ export default function AdminCarersPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {carers.length === 0 ? (
+                                    {filteredCarers.length === 0 ? (
                                         <tr>
                                             <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                                                {loading ? 'Loading carers...' : 'No carers found.'}
+                                                {loading ? 'Loading carers...' : search ? 'No carers match your search.' : 'No carers found.'}
                                             </td>
                                         </tr>
                                     ) : (
-                                        carers.map((carer) => (
+                                        filteredCarers.map((carer) => (
                                             <tr key={carer.id} className="hover:bg-gray-50 transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm font-medium text-gray-900">
@@ -158,25 +176,9 @@ export default function AdminCarersPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                            carer.verified
-                                                                ? 'bg-green-100 text-green-800 flex items-center gap-1'
-                                                                : 'bg-yellow-100 text-yellow-800 flex items-center gap-1'
-                                                        }`}
-                                                    >
-                                                        {carer.verified ? (
-                                                            <>
-                                                                <CheckCircle className="h-3 w-3" />
-                                                                Verified
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <XCircle className="h-3 w-3" />
-                                                                Pending
-                                                            </>
-                                                        )}
-                                                    </span>
+                                                    <div className="text-sm text-gray-700">
+                                                        {carer.verified ? 'Verified' : 'Pending'}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right">
                                                     <Button

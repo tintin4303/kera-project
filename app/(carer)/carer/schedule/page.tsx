@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import AppointmentCard from '@/components/AppointmentCard';
 import AddScheduleModal from '@/components/carer/AddScheduleModal';
 import CalendarView from '@/components/carer/CalendarView';
-import { Plus, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { useLanguage } from '@/components/LanguageContext';
 import { isSameDay, format } from 'date-fns';
 
@@ -161,7 +161,6 @@ export default function CarerSchedulePage() {
                                         onClick={() => setIsModalOpen(true)}
                                         className="mt-6 text-kera-vibrant font-medium text-sm flex items-center justify-center mx-auto"
                                     >
-                                        <Plus className="h-4 w-4 mr-1" />
                                         {t('carer_schedule.add_first')}
                                     </button>
                                 </div>
@@ -211,7 +210,7 @@ export default function CarerSchedulePage() {
                                                                 {(a.notes || '').split('\n')[0]?.replace('Service: ', '') || t('carer_schedule.visit')}
                                                             </td>
                                                             <td className="px-4 py-3 whitespace-nowrap">
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badge}`}>
+                                                                <span className="text-xs text-gray-600">
                                                                     {disp}
                                                                 </span>
                                                             </td>
@@ -227,9 +226,6 @@ export default function CarerSchedulePage() {
                                 </div>
                             ) : (
                                 <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-                                    <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                                        <CalendarIcon className="h-6 w-6 text-gray-300" />
-                                    </div>
                                     <h3 className="text-gray-900 font-medium">{t('carer_schedule.no_history')}</h3>
                                     <p className="text-sm text-gray-500 mt-1">{t('carer_schedule.history_desc')}</p>
                                 </div>
@@ -238,16 +234,18 @@ export default function CarerSchedulePage() {
                     )}
                 </div>
             )}
-            {/* Floating Add Button */}
-            <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-40">
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="p-4 bg-kera-vibrant text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 hover:shadow-xl transition-all duration-200 ring-4 ring-white"
-                    aria-label={t('carer_schedule.add_schedule')}
-                >
-                    <Plus className="h-6 w-6 relative z-10" />
-                </button>
-            </div>
+            {/* Floating Add Button - Show in Upcoming and Calendar views */}
+            {(view === 'Upcoming' || view === 'Calendar') && (
+                <div className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-40">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="p-4 bg-kera-vibrant text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 hover:shadow-xl transition-all duration-200 ring-4 ring-white"
+                        aria-label={t('carer_schedule.add_schedule')}
+                    >
+                        <Plus className="h-6 w-6" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

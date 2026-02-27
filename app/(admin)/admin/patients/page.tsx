@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, RefreshCcw, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCcw, Loader2 } from 'lucide-react';
 
 interface Carer {
     id: string;
@@ -48,6 +48,7 @@ export default function AdminPatientsPage() {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [assignments, setAssignments] = useState<Record<string, string>>({});
+    const [search, setSearch] = useState('');
 
     const unassignedCount = useMemo(() => patients.filter((p) => !p.carerId).length, [patients]);
 
@@ -129,6 +130,17 @@ export default function AdminPatientsPage() {
         }
     };
 
+    const filteredPatients = patients.filter(patient => {
+        const searchLower = search.toLowerCase();
+        return (
+            patient.name.toLowerCase().includes(searchLower) ||
+            patient.user.email?.toLowerCase().includes(searchLower) ||
+            patient.user.name?.toLowerCase().includes(searchLower) ||
+            patient.city?.toLowerCase().includes(searchLower) ||
+            patient.country?.toLowerCase().includes(searchLower)
+        );
+    });
+
     if (status === 'loading') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -160,17 +172,24 @@ export default function AdminPatientsPage() {
                     </Button>
                 </div>
 
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        placeholder="Search by patient name, family contact, or location..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-300"
+                    />
+                </div>
+
                 {unassignedCount > 0 && (
-                    <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <p className="text-sm font-medium text-yellow-800">
-                                {unassignedCount} unassigned patient{unassignedCount > 1 ? 's' : ''}
-                            </p>
-                            <p className="text-xs text-yellow-700 mt-1">
-                                Please assign carers to ensure continuous care coverage.
-                            </p>
-                        </div>
+                    <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                            {unassignedCount} unassigned patient{unassignedCount > 1 ? 's' : ''}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                            Please assign carers to ensure continuous care coverage.
+                        </p>
                     </div>
                 )}
 
@@ -205,14 +224,14 @@ export default function AdminPatientsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {patients.length === 0 ? (
+                                    {filteredPatients.length === 0 ? (
                                         <tr>
                                             <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                                                {loading ? 'Loading patients...' : 'No patients found.'}
+                                                {loading ? 'Loading patients...' : search ? 'No patients match your search.' : 'No patients found.'}
                                             </td>
                                         </tr>
                                     ) : (
-                                        patients.map((patient) => (
+                                        filteredPatients.map((patient) => (
                                             <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm font-medium text-gray-900">

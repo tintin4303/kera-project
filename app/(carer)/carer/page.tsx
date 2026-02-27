@@ -1,11 +1,11 @@
 "use client";
-import React from 'react';
-import { Activity, Users, Calendar, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/components/LanguageContext';
+import { format } from 'date-fns';
 
 interface Patient {
     id: string;
@@ -17,8 +17,23 @@ interface Patient {
     };
 }
 
+interface Appointment {
+    id: string;
+    scheduledAt: string;
+    status: string;
+    notes?: string | null;
+    location?: string | null;
+    patient: {
+        name: string;
+        address?: string | null;
+    };
+}
+
 export default function CarerDashboard() {
     const { t } = useLanguage();
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+
     const { data: patients = [], isLoading: loading } = useQuery<Patient[]>({
         queryKey: ['carer-patients'],
         queryFn: async () => {
@@ -28,35 +43,76 @@ export default function CarerDashboard() {
         }
     });
 
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            setAppointmentsLoading(true);
+            try {
+                const res = await fetch('/api/appointments');
+                if (res.ok) {
+                    const data = await res.json();
+                    setAppointments(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch appointments:', error);
+            } finally {
+                setAppointmentsLoading(false);
+            }
+        };
+        fetchAppointments();
+    }, []);
+
+    const upcomingAppointments = appointments
+        .filter(appt => {
+            const isNotCancelled = appt.status !== 'CANCELLED' && appt.status !== 'COMPLETED';
+            const isInFuture = new Date(appt.scheduledAt) >= new Date();
+            return isNotCancelled && isInFuture;
+        })
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
+        .slice(0, 5);
+
     return (
         <div className="space-y-6">
 
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <Card padding="sm" className="flex flex-col items-center justify-center text-center">
-                    <div className="rounded-full bg-accent p-2 mb-2">
-                        <Users className="h-5 w-5 text-primary" />
+            {/* Upcoming Appointments */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Upcoming Appointments</h2>
+                    <Link href="/carer/schedule">
+                        <Button variant="ghost" size="sm">View All</Button>
+                    </Link>
+                </div>
+                {appointmentsLoading ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-300 mx-auto"></div>
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{t('carer_dashboard.patients')}</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">{patients.length}</p>
-                </Card>
-
-                <Card padding="sm" className="flex flex-col items-center justify-center text-center">
-                    <div className="rounded-full bg-green-100 p-2 mb-2">
-                        <Activity className="h-5 w-5 text-green-600" />
+                ) : upcomingAppointments.length === 0 ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
+                        <p className="text-sm">No appointments scheduled</p>
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{t('carer_dashboard.records')}</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">0</p>
-                </Card>
-
-                <Card padding="sm" className="flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1">
-                    <div className="rounded-full bg-blue-100 p-2 mb-2">
-                        <Calendar className="h-5 w-5 text-blue-600" />
+                ) : (
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div className="divide-y divide-gray-200">
+                            {upcomingAppointments.map((appt) => (
+                                <div key={appt.id} className="p-4 hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <p className="font-medium text-gray-900">{appt.patient.name}</p>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {format(new Date(appt.scheduledAt), 'MMM d, yyyy h:mm a')}
+                                            </p>
+                                            {appt.location && (
+                                                <p className="text-sm text-gray-500 mt-1">{appt.location}</p>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-gray-600 bg-gray-100 px-2.5 py-1 rounded">
+                                            {appt.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{t('carer_dashboard.visits')}</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">0</p>
-                </Card>
+                )}
             </div>
 
             {/* Assigned Patients */}
@@ -74,8 +130,7 @@ export default function CarerDashboard() {
                     </div>
                 ) : patients.length === 0 ? (
                     <Card className="text-center py-12">
-                        <Users className="mx-auto h-12 w-12 text-gray-300" />
-                        <h3 className="mt-4 text-sm font-semibold text-gray-900">{t('carer_dashboard.no_patients')}</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">{t('carer_dashboard.no_patients')}</h3>
                         <p className="mt-1 text-sm text-gray-500">
                             {t('carer_dashboard.contact_admin')}
                         </p>
@@ -122,27 +177,17 @@ export default function CarerDashboard() {
             {/* Quick Actions */}
             <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('carer_dashboard.quick_actions')}</h2>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4">
                     <Link href="/carer/patients">
-                        <Card hover padding="sm" className="cursor-pointer text-center h-full active:scale-[0.98] transition-all">
-                            <div className="flex flex-col items-center justify-center">
-                                <div className="rounded-full bg-purple-100 p-2 mb-2">
-                                    <Plus className="h-5 w-5 text-purple-600" />
-                                </div>
-                                <p className="text-sm font-bold text-gray-900">{t('carer_dashboard.log_vitals')}</p>
-                            </div>
-                        </Card>
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all h-full flex items-center justify-center">
+                            <p className="text-sm font-semibold text-gray-900">{t('carer_dashboard.log_vitals')}</p>
+                        </div>
                     </Link>
 
-                    <Link href="/carer/appointments">
-                        <Card hover padding="sm" className="cursor-pointer text-center h-full active:scale-[0.98] transition-all">
-                            <div className="flex flex-col items-center justify-center">
-                                <div className="rounded-full bg-blue-100 p-2 mb-2">
-                                    <Calendar className="h-5 w-5 text-blue-600" />
-                                </div>
-                                <p className="text-sm font-bold text-gray-900">{t('carer_dashboard.schedule')}</p>
-                            </div>
-                        </Card>
+                    <Link href="/carer/schedule">
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all h-full flex items-center justify-center">
+                            <p className="text-sm font-semibold text-gray-900">{t('carer_dashboard.schedule')}</p>
+                        </div>
                     </Link>
                 </div>
             </div>

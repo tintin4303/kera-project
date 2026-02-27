@@ -25,7 +25,7 @@ const translations = {
         "profile.signout_desc": "Sign out of your account on this device.",
         "profile.role": "Role",
         "profile.joined": "Joined",
-        "nav.dashboard": "Dashboard",
+        "nav.dashboard": "Home",
         "nav.patients": "Patients",
         "nav.chat": "Chat",
         "nav.schedule": "Schedules",

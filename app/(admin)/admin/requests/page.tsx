@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { Check, X, Clock, MapPin, Loader2, Calendar, ArrowLeft, RefreshCcw, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, RefreshCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatPrice } from '@/lib/utils';
 
@@ -38,6 +38,7 @@ export default function AdminRequestsPage() {
     const [requests, setRequests] = useState<ServiceRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -91,16 +92,15 @@ export default function AdminRequestsPage() {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-            case 'CONFIRMED': return 'bg-blue-100 text-blue-800';
-            case 'IN_PROGRESS': return 'bg-purple-100 text-purple-800';
-            case 'COMPLETED': return 'bg-green-100 text-green-800';
-            case 'CANCELLED': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
+    const filteredRequests = requests.filter(request => {
+        const searchLower = search.toLowerCase();
+        return (
+            request.service.name.toLowerCase().includes(searchLower) ||
+            request.patient?.name.toLowerCase().includes(searchLower) ||
+            request.user.name?.toLowerCase().includes(searchLower) ||
+            request.user.email?.toLowerCase().includes(searchLower)
+        );
+    });
 
     if (status === 'loading') {
         return (
@@ -133,132 +133,146 @@ export default function AdminRequestsPage() {
                     </Button>
                 </div>
 
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        placeholder="Search by service, patient, requester..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-300"
+                    />
+                </div>
+
                 {loading && requests.length === 0 ? (
                     <div className="flex justify-center py-12">
                         <Loader2 className="h-8 w-8 animate-spin text-kera-vibrant" />
                     </div>
                 ) : (
                     <div className="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200">
-                        <ul className="divide-y divide-gray-200">
-                            {requests.length === 0 ? (
-                                <li className="px-6 py-12 text-center text-gray-500">
-                                    No service requests found.
-                                </li>
-                            ) : (
-                                requests.map((request) => (
-                                    <li key={request.id} className="hover:bg-gray-50 transition-colors">
-                                        <div className="px-4 py-4 sm:px-6">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div>
-                                                        <p className="text-sm font-medium text-kera-vibrant truncate">
-                                                            {request.service.name}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {request.service.category}
-                                                        </p>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Service
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Patient
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Requester
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Price
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Action
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredRequests.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                                {search ? 'No requests match your search.' : 'No service requests found.'}
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredRequests.map((request) => (
+                                            <tr key={request.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {request.service.name}
                                                     </div>
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                                                        {request.status.replace('_', ' ')}
-                                                    </span>
-                                                </div>
-                                                <div className="ml-2 flex-shrink-0 flex">
-                                                    <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-50 text-green-800">
-                                                        {formatPrice(request.price, request.currency)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="mt-2 sm:flex sm:justify-between">
-                                                <div className="sm:flex">
-                                                    <p className="flex items-center text-sm text-gray-500 mr-6">
-                                                        <span className="font-medium text-gray-900 mr-1">Patient:</span>
+                                                    <div className="text-xs text-gray-500">
+                                                        {request.service.category}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">
                                                         {request.patient?.name || 'Unknown'}
-                                                    </p>
-                                                    <p className="flex items-center text-sm text-gray-500 mr-6">
-                                                        <span className="font-medium text-gray-900 mr-1">Requester:</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-500">
                                                         {request.user.name || request.user.email}
-                                                    </p>
-                                                    {request.scheduledDate && (
-                                                        <p className="flex items-center text-sm text-gray-500">
-                                                            <Clock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                                                            {new Date(request.scheduledDate).toLocaleDateString()}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {(request.location || request.notes) && (
-                                                <div className="mt-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-md border border-gray-100">
-                                                    {request.location && (
-                                                        <p className="mb-1"><span className="font-semibold">Location:</span> {request.location}</p>
-                                                    )}
-                                                    {request.notes && (
-                                                        <p><span className="font-semibold">Notes:</span> {request.notes}</p>
-                                                    )}
-                                                </div>
-                                            )}
-                                            
-                                            {/* Action Buttons */}
-                                            <div className="mt-4 flex items-center justify-end gap-2 border-t border-gray-100 pt-3">
-                                                {request.status === 'PENDING' && (
-                                                    <>
-                                                        <Button 
-                                                            size="sm" 
-                                                            variant="danger"
-                                                            onClick={() => handleStatusUpdate(request.id, 'CANCELLED')}
-                                                            isLoading={updating === request.id}
-                                                            disabled={!!updating}
-                                                        >
-                                                            Reject
-                                                        </Button>
-                                                        <Button 
-                                                            size="sm" 
-                                                            onClick={() => handleStatusUpdate(request.id, 'CONFIRMED')}
-                                                            isLoading={updating === request.id}
-                                                            disabled={!!updating}
-                                                        >
-                                                            Confirm
-                                                        </Button>
-                                                    </>
-                                                )}
-                                                {request.status === 'CONFIRMED' && (
-                                                    <Button 
-                                                        size="sm" 
-                                                        onClick={() => handleStatusUpdate(request.id, 'IN_PROGRESS')}
-                                                        isLoading={updating === request.id}
-                                                        disabled={!!updating}
-                                                    >
-                                                        Start Service
-                                                    </Button>
-                                                )}
-                                                {request.status === 'IN_PROGRESS' && (
-                                                    <Button 
-                                                        size="sm" 
-                                                        className="bg-green-600 hover:bg-green-700"
-                                                        onClick={() => handleStatusUpdate(request.id, 'COMPLETED')}
-                                                        isLoading={updating === request.id}
-                                                        disabled={!!updating}
-                                                    >
-                                                        Mark Complete
-                                                    </Button>
-                                                )}
-                                                {request.status === 'COMPLETED' && (
-                                                     <span className="text-sm text-green-600 font-medium flex items-center">
-                                                        <CheckCircle className="h-4 w-4 mr-1" />
-                                                        Completed
-                                                     </span>
-                                                )}
-                                                 {request.status === 'CANCELLED' && (
-                                                     <span className="text-sm text-red-600 font-medium flex items-center">
-                                                        <XCircle className="h-4 w-4 mr-1" />
-                                                        Cancelled
-                                                     </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))
-                            )}
-                        </ul>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-500">
+                                                        {request.scheduledDate 
+                                                            ? new Date(request.scheduledDate).toLocaleDateString() 
+                                                            : '—'}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {formatPrice(request.price, request.currency)}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-700">
+                                                        {request.status.replace('_', ' ')}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {request.status === 'PENDING' && (
+                                                            <>
+                                                                <Button 
+                                                                    size="sm" 
+                                                                    variant="danger"
+                                                                    onClick={() => handleStatusUpdate(request.id, 'CANCELLED')}
+                                                                    isLoading={updating === request.id}
+                                                                    disabled={!!updating}
+                                                                >
+                                                                    Reject
+                                                                </Button>
+                                                                <Button 
+                                                                    size="sm" 
+                                                                    onClick={() => handleStatusUpdate(request.id, 'CONFIRMED')}
+                                                                    isLoading={updating === request.id}
+                                                                    disabled={!!updating}
+                                                                >
+                                                                    Confirm
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                        {request.status === 'CONFIRMED' && (
+                                                            <Button 
+                                                                size="sm" 
+                                                                onClick={() => handleStatusUpdate(request.id, 'IN_PROGRESS')}
+                                                                isLoading={updating === request.id}
+                                                                disabled={!!updating}
+                                                            >
+                                                                Start
+                                                            </Button>
+                                                        )}
+                                                        {request.status === 'IN_PROGRESS' && (
+                                                            <Button 
+                                                                size="sm" 
+                                                                className="bg-green-600 hover:bg-green-700"
+                                                                onClick={() => handleStatusUpdate(request.id, 'COMPLETED')}
+                                                                isLoading={updating === request.id}
+                                                                disabled={!!updating}
+                                                            >
+                                                                Complete
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </div>
