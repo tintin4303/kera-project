@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import AppointmentCard from '../../../../components/AppointmentCard';
 import CalendarView from '@/components/carer/CalendarView';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 import { isSameDay, format } from 'date-fns';
 
 interface Appointment {
@@ -17,6 +18,7 @@ interface Appointment {
 }
 
 export default function AppointmentsPage() {
+    const { t } = useLanguage();
     const [view, setView] = useState<'Upcoming' | 'Past' | 'Calendar'>('Upcoming');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -159,26 +161,26 @@ export default function AppointmentsPage() {
 
             {/* Tabs */}
             <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button
+                    <button
                     onClick={() => setView('Upcoming')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Upcoming' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    Upcoming
+                        {t('schedules.upcoming')}
                 </button>
                 <button
                     onClick={() => setView('Calendar')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Calendar' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    Calendar
+                        {t('schedules.calendar')}
                 </button>
                 <button
                     onClick={() => setView('Past')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Past' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    History
+                        {t('schedules.history')}
                 </button>
             </div>
 
@@ -219,7 +221,7 @@ export default function AppointmentsPage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
-                                        <p className="text-sm text-gray-500 italic">No visits scheduled for this date.</p>
+                                        <p className="text-sm text-gray-500 italic">{t('schedules.none_for_date')}</p>
                                     </div>
                                 )}
                             </div>
@@ -238,7 +240,7 @@ export default function AppointmentsPage() {
                             ) : (
                                 <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
                                     <CalendarIcon className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                                    <h3 className="text-gray-900 font-medium">No upcoming schedules</h3>
+                                    <h3 className="text-gray-900 font-medium">{t('schedules.no_upcoming')}</h3>
                                     <p className="text-sm text-gray-500 mt-1">Your carer will schedule visits for you here.</p>
                                 </div>
                             )}
@@ -306,7 +308,7 @@ export default function AppointmentsPage() {
                                     <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                         <CalendarIcon className="h-6 w-6 text-gray-300" />
                                     </div>
-                                    <h3 className="text-gray-900 font-medium">No history</h3>
+                                    <h3 className="text-gray-900 font-medium">{t('schedules.no_history')}</h3>
                                     <p className="text-sm text-gray-500 mt-1">Completed or cancelled schedules will appear here.</p>
                                 </div>
                             )}

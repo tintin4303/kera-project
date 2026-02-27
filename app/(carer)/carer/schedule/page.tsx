@@ -4,6 +4,7 @@ import AppointmentCard from '@/components/AppointmentCard';
 import AddScheduleModal from '@/components/carer/AddScheduleModal';
 import CalendarView from '@/components/carer/CalendarView';
 import { Plus, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 import { isSameDay, format } from 'date-fns';
 
 interface Appointment {
@@ -19,6 +20,7 @@ interface Appointment {
 }
 
 export default function CarerSchedulePage() {
+    const { t } = useLanguage();
     const [view, setView] = useState<'Upcoming' | 'Past' | 'Calendar'>('Upcoming');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,21 +80,21 @@ export default function CarerSchedulePage() {
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Upcoming' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    Upcoming
+                    {t('schedules.upcoming')}
                 </button>
                 <button
                     onClick={() => setView('Calendar')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Calendar' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    Calendar
+                    {t('schedules.calendar')}
                 </button>
                 <button
                     onClick={() => setView('Past')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Past' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    History
+                    {t('schedules.history')}
                 </button>
             </div>
 
@@ -130,7 +132,7 @@ export default function CarerSchedulePage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
-                                        <p className="text-sm text-gray-500 italic">No visits scheduled for this date.</p>
+                                        <p className="text-sm text-gray-500 italic">{t('schedules.none_for_date')}</p>
                                     </div>
                                 )}
                             </div>
@@ -153,7 +155,7 @@ export default function CarerSchedulePage() {
                                     <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                         <CalendarIcon className="h-6 w-6 text-gray-300" />
                                     </div>
-                                    <h3 className="text-gray-900 font-medium">No upcoming schedules</h3>
+                                    <h3 className="text-gray-900 font-medium">{t('schedules.no_upcoming')}</h3>
                                     <p className="text-sm text-gray-500 mt-1">Start by adding a new visit or regular checkup.</p>
                                     <button
                                         onClick={() => setIsModalOpen(true)}
@@ -228,7 +230,7 @@ export default function CarerSchedulePage() {
                                     <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                         <CalendarIcon className="h-6 w-6 text-gray-300" />
                                     </div>
-                                    <h3 className="text-gray-900 font-medium">No history</h3>
+                                    <h3 className="text-gray-900 font-medium">{t('schedules.no_history')}</h3>
                                     <p className="text-sm text-gray-500 mt-1">Completed or cancelled schedules will appear here.</p>
                                 </div>
                             )}

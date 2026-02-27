@@ -2,6 +2,7 @@
 import React from 'react';
 import { FileText, Download, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface Report {
     id: string;
@@ -20,6 +21,7 @@ interface Report {
 }
 
 export default function ReportsPage() {
+    const { t } = useLanguage();
     const { data: reports = [], isLoading } = useQuery<Report[]>({
         queryKey: ['reports'],
         queryFn: async () => {
@@ -48,11 +50,11 @@ export default function ReportsPage() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h1 className="text-2xl font-bold text-gray-900">Digital Reports</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('reports.title')}</h1>
                 <div className="mt-3 sm:mt-0">
                     <select className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md shadow-sm border">
-                        <option>All Reports</option>
-                        <option>Weekly Summaries</option>
+                        <option>{t('reports.filter.all')}</option>
+                        <option>{t('reports.filter.weekly')}</option>
                         <option>Urgent Care</option>
                     </select>
                 </div>
@@ -62,8 +64,8 @@ export default function ReportsPage() {
                 {reports.length === 0 ? (
                     <div className="text-center py-12">
                         <FileText className="mx-auto h-12 w-12 text-gray-300" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No reports</h3>
-                        <p className="mt-1 text-sm text-gray-500">You don't have any reports yet.</p>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">{t('reports.empty.title')}</h3>
+                        <p className="mt-1 text-sm text-gray-500">{t('reports.empty.desc')}</p>
                     </div>
                 ) : (
                     <ul role="list" className="divide-y divide-gray-200">
@@ -107,20 +109,6 @@ export default function ReportsPage() {
                 )}
             </div>
 
-            {/* Empty State / Info */}
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start">
-                <div className="flex-shrink-0">
-                    <FileText className="h-5 w-5 text-blue-400" aria-hidden="true" />
-                </div>
-                <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800">About Digital Reports</h3>
-                    <div className="mt-2 text-sm text-blue-700">
-                        <p>
-                            Digital reports are generated after every carer visit. They include vital signs, medication logs, and clinical notes. You can download them as PDF for your records.
-                        </p>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

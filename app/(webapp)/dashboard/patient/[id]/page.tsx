@@ -6,6 +6,7 @@ import MoodBadge from '@/components/MoodBadge';
 import Modal from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface Patient {
     id: string;
@@ -53,6 +54,7 @@ type Mood = 'Happy' | 'Neutral' | 'Sad' | 'Anxious';
 export default function PatientDetailsPage() {
     const params = useParams();
     const { id } = params;
+    const { t } = useLanguage();
     const [patient, setPatient] = useState<Patient | null>(null);
     const [loading, setLoading] = useState(true);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -125,8 +127,8 @@ export default function PatientDetailsPage() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading patient details...</div>;
-    if (!patient) return <div className="p-8 text-center text-red-500">Patient not found</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500">{t('patient.loading')}</div>;
+    if (!patient) return <div className="p-8 text-center text-red-500">{t('patient.not_found')}</div>;
 
     return (
         <div className="space-y-6">
@@ -142,12 +144,12 @@ export default function PatientDetailsPage() {
                         <div className="mt-3 text-center sm:mt-0 sm:pt-1 sm:text-left">
                             <p className="text-lg font-bold text-gray-900 sm:text-xl">{patient.name}</p>
                             <p className="text-sm font-medium text-gray-500">
-                                {patient.gender ? <span className="capitalize">{patient.gender}</span> : 'Gender not specified'}
+                                {patient.gender ? <span className="capitalize">{patient.gender}</span> : t('patient.gender_unspecified')}
                                 {patient.dateOfBirth && ` • ${new Date(patient.dateOfBirth).toLocaleDateString()}`}
                             </p>
                             <div className="mt-1 flex items-center text-sm text-gray-500 justify-center sm:justify-start">
                                 <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0 text-gray-400" />
-                                {patient.city || 'Unknown City'}, {patient.country || 'Myanmar'}
+                                {patient.city || t('patient.unknown_city')}, {patient.country || 'Myanmar'}
                             </div>
                         </div>
                     </div>
@@ -172,7 +174,7 @@ export default function PatientDetailsPage() {
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100 flex justify-between items-center">
                             <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
                                 <Activity className="mr-2 h-5 w-5 text-kera-vibrant" />
-                                Recent Health Records
+                                {t('patient.recent_records')}
                             </h3>
                         </div>
                         {patient.healthRecords && patient.healthRecords.length > 0 ? (
@@ -180,10 +182,10 @@ export default function PatientDetailsPage() {
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">BP</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Glucose</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mood</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('patient.table.date')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('patient.table.bp')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('patient.table.glucose')}</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('patient.table.mood')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
@@ -212,7 +214,7 @@ export default function PatientDetailsPage() {
                         ) : (
                             <div className="p-8 text-center text-gray-500 text-sm flex flex-col items-center">
                                 <Activity className="h-10 w-10 text-gray-300 mb-2" />
-                                <p>No health records yet.</p>
+                                <p>{t('patient.no_records')}</p>
                             </div>
                         )}
                     </div>
@@ -222,7 +224,7 @@ export default function PatientDetailsPage() {
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
                             <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
                                 <Heart className="mr-2 h-5 w-5 text-red-500" />
-                                Medications
+                                {t('patient.medications')}
                             </h3>
                         </div>
                         <div className="p-4">
@@ -235,13 +237,13 @@ export default function PatientDetailsPage() {
                                                 <p className="text-xs text-gray-500">{med.dosage} • {med.frequency}</p>
                                             </div>
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Active
+                                                {t('patient.active')}
                                             </span>
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-gray-500 text-sm text-center">No active medications.</p>
+                                <p className="text-gray-500 text-sm text-center">{t('patient.no_active_meds')}</p>
                             )}
                         </div>
                     </div>
@@ -253,7 +255,7 @@ export default function PatientDetailsPage() {
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
                             <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
                                 <Calendar className="mr-2 h-5 w-5 text-blue-500" />
-                                Upcoming Visits
+                                {t('patient.upcoming_visits')}
                             </h3>
                         </div>
                         <div className="p-4">
@@ -268,13 +270,13 @@ export default function PatientDetailsPage() {
                                                 <Clock className="h-3 w-3 mr-1" />
                                                 {new Date(appt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
-                                            <p className="text-sm text-gray-600 mt-1">{appt.notes || 'Routine Visit'}</p>
+                                            <p className="text-sm text-gray-600 mt-1">{appt.notes || t('patient.routine_visit')}</p>
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
                                 <div className="text-center py-4">
-                                    <p className="text-sm text-gray-500 mb-3">No upcoming visits.</p>
+                                    <p className="text-sm text-gray-500 mb-3">{t('patient.no_upcoming')}</p>
                                 </div>
                             )}
                         </div>
@@ -285,7 +287,7 @@ export default function PatientDetailsPage() {
                         <div className="px-4 py-5 sm:px-6 border-b border-gray-100">
                             <h3 className="text-lg leading-6 font-medium text-gray-900 flex items-center">
                                 <User className="mr-2 h-5 w-5 text-kera-vibrant" />
-                                Assigned Carer
+                                {t('patient.assigned_carer')}
                             </h3>
                         </div>
                         <div className="p-4">
@@ -300,13 +302,13 @@ export default function PatientDetailsPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{patient.carer.user.name}</p>
-                                        <p className="text-xs text-kera-vibrant font-medium mt-0.5">Verified Professional</p>
+                                        <p className="text-xs text-kera-vibrant font-medium mt-0.5">{t('patient.verified_pro')}</p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="text-center py-4">
-                                    <p className="text-sm text-gray-500 italic text-center">Assigning a carer...</p>
-                                    <p className="text-[10px] text-gray-400 mt-1 text-center">Our team is matching a carer for {patient.name.split(' ')[0]}.</p>
+                                    <p className="text-sm text-gray-500 italic text-center">{t('patient.assigning_carer')}</p>
+                                    <p className="text-[10px] text-gray-400 mt-1 text-center">{t('patient.matching')}</p>
                                 </div>
                             )}
                         </div>
@@ -317,11 +319,11 @@ export default function PatientDetailsPage() {
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
-                title="Edit Patient Profile"
+                title={t('patient.modal.title')}
             >
                 <form onSubmit={handleSaveProfile} className="space-y-4">
                     <Input
-                        label="Name"
+                        label={t('patient.modal.name')}
                         value={editFormData.name}
                         onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
                         required
@@ -329,22 +331,22 @@ export default function PatientDetailsPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <Input
-                            label="Date of Birth"
+                            label={t('patient.modal.dob')}
                             type="date"
                             value={editFormData.dateOfBirth}
                             onChange={(e) => setEditFormData({ ...editFormData, dateOfBirth: e.target.value })}
                         />
                         <div>
-                            <label className="mb-1.5 block text-sm font-medium text-gray-700">Gender</label>
+                            <label className="mb-1.5 block text-sm font-medium text-gray-700">{t('patient.modal.gender')}</label>
                             <select
                                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-kera-vibrant focus:outline-none focus:ring-kera-vibrant"
                                 value={editFormData.gender}
                                 onChange={(e) => setEditFormData({ ...editFormData, gender: e.target.value })}
                             >
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
+                                <option value="">{t('patient.modal.gender_select')}</option>
+                                <option value="male">{t('patient.modal.gender_male')}</option>
+                                <option value="female">{t('patient.modal.gender_female')}</option>
+                                <option value="other">{t('patient.modal.gender_other')}</option>
                             </select>
                         </div>
                     </div>
