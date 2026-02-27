@@ -195,7 +195,7 @@ const translations = {
         "reports.filter.weekly": "အ tuần စုစည်းခြင်းများ",
         "reports.empty.title": "အစီရင်ခံစာ မရှိပါ",
         "reports.empty.desc": "သင့်တွင် အစီရင်ခံစာ မရှိသေးပါ။",
-        "family.core.title": "အဓိက စာရင်းသွင်းပွဲ အင်္ဂါရပ်များ",
+        "family.core.title": "အဓိက Plan အင်္ဂါရပ်များ",
         "family.core.subtitle": "၁ လ ၁,၀၀၀ ဘတ် စရိတ်တွင် ပါ၀င်ပါသည်။",
         "family.feature.health_monitor": "ကျန်းမာရေး စောင့်ကြည့်မှု",
         "family.feature.health_monitor_desc": "အသက်ရှူနှုန်းများနှင့် အချက်အလက်များကို လိုက်နာပါ။",
