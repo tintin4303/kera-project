@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import DashboardSidebar, { dashboardNavigation } from '../../../components/DashboardSidebar';
 import DashboardHeader from '../../../components/DashboardHeader';
 import MobileBottomNav from '@/components/MobileBottomNav';
@@ -13,6 +13,7 @@ export default function DashboardLayout({
 }) {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -38,7 +39,7 @@ export default function DashboardLayout({
 
             <div className="md:pl-64 flex flex-col min-h-screen">
                 <DashboardHeader />
-                <main className="flex-1">
+                <main className={`flex-1 ${pathname?.startsWith('/dashboard/chat/') ? 'overflow-hidden' : ''}`}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6">
                         {children}
                     </div>

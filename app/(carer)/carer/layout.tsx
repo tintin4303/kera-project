@@ -2,12 +2,14 @@
 import CarerSidebar, { carerNavigation } from '@/components/carer/CarerSidebar';
 import CarerHeader from '@/components/carer/CarerHeader';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import { usePathname } from 'next/navigation';
 
 export default function CarerDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const pathname = usePathname();
     return (
         <div className="min-h-screen bg-gray-50 font-outfit pb-16 md:pb-0">
             <CarerSidebar />
@@ -18,7 +20,7 @@ export default function CarerDashboardLayout({
 
             <div className="md:pl-64 flex flex-col min-h-screen">
                 <CarerHeader />
-                <main className="flex-1">
+                <main className={`flex-1 ${pathname?.startsWith('/carer/chat/') ? 'overflow-hidden' : ''}`}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6">
                         {children}
                     </div>

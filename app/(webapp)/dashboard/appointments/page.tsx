@@ -226,7 +226,7 @@ export default function AppointmentsPage() {
                         </div>
                     )}
 
-                    {(view === 'Upcoming' || view === 'Past') && (
+                    {view === 'Upcoming' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {filteredAppointments.length > 0 ? (
                                 filteredAppointments.map(appt => (
@@ -238,8 +238,76 @@ export default function AppointmentsPage() {
                             ) : (
                                 <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
                                     <CalendarIcon className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                                    <h3 className="text-gray-900 font-medium">No {view.toLowerCase()} schedules</h3>
+                                    <h3 className="text-gray-900 font-medium">No upcoming schedules</h3>
                                     <p className="text-sm text-gray-500 mt-1">Your carer will schedule visits for you here.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {view === 'Past' && (
+                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {filteredAppointments.length > 0 ? (
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
+                                                <tr>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Date</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">Time</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Service</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap hidden md:table-cell">Carer</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">Status</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap hidden md:table-cell">Location</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {filteredAppointments.map(a => {
+                                                    const status = (a.status || '').toUpperCase();
+                                                    const disp =
+                                                        status === 'COMPLETED' ? 'Completed' :
+                                                        status === 'CANCELLED' ? 'Cancelled' : 'Completed';
+                                                    const badge =
+                                                        disp === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                                                    return (
+                                                        <tr key={a.id} className="hover:bg-gray-50 transition-colors">
+                                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                                {new Date(a.scheduledAt).toLocaleDateString()}
+                                                                <div className="sm:hidden text-xs text-gray-500">
+                                                                    {new Date(a.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">
+                                                                {new Date(a.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </td>
+                                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                                {(a.notes || '').split('\n')[0]?.replace('Service: ', '') || 'Visit'}
+                                                            </td>
+                                                            <td className="px-4 py-3 whitespace-nowrap hidden md:table-cell">
+                                                                {a.carer?.name || '—'}
+                                                            </td>
+                                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badge}`}>
+                                                                    {disp}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-3 whitespace-nowrap hidden md:table-cell">
+                                                                {a.location || 'Home'}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+                                    <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                        <CalendarIcon className="h-6 w-6 text-gray-300" />
+                                    </div>
+                                    <h3 className="text-gray-900 font-medium">No history</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Completed or cancelled schedules will appear here.</p>
                                 </div>
                             )}
                         </div>

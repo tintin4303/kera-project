@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Send, User, Loader2, MessageSquare, Image, X, ChevronLeft } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/components/LanguageContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface Contact {
@@ -23,19 +25,23 @@ interface Message {
     mediaUrl?: string | null;
 }
 
-export default function ChatInterface() {
+export default function ChatInterface({ selectedContactId, standalone = false }: { selectedContactId?: string, standalone?: boolean }) {
     const { data: session } = useSession();
+    const { t } = useLanguage();
+    const router = useRouter();
     const queryClient = useQueryClient();
     const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const [sending, setSending] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [showContacts, setShowContacts] = useState(true); // For mobile toggle
+    const [showContacts, setShowContacts] = useState(!standalone); // For mobile toggle; hidden in standalone conversation view
     const [searchTerm, setSearchTerm] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isFirstLoad = useRef(true);
+    const prevLenRef = useRef(0);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const { data: contacts = [], isLoading: loadingContacts } = useQuery<Contact[]>({
         queryKey: ['chat-contacts'],
@@ -47,10 +53,15 @@ export default function ChatInterface() {
     });
 
     useEffect(() => {
-        if (contacts.length > 0 && !selectedContact) {
-            setSelectedContact(contacts[0]);
+        if (contacts.length > 0) {
+            if (selectedContactId) {
+                const found = contacts.find(c => c.id === selectedContactId) || null;
+                setSelectedContact(found);
+            } else if (!selectedContact) {
+                setSelectedContact(contacts[0]);
+            }
         }
-    }, [contacts, selectedContact]);
+    }, [contacts, selectedContact, selectedContactId]);
 
     // Reset first load flag when contact changes
     useEffect(() => {
@@ -69,18 +80,49 @@ export default function ChatInterface() {
         refetchInterval: 5000,
     });
 
-    useEffect(() => {
-        if (messages.length > 0 && messagesEndRef.current) {
-            setTimeout(() => {
-                if (isFirstLoad.current) {
-                    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-                    isFirstLoad.current = false;
-                } else {
-                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                }
-            }, 100);
+    // Find the nearest scrollable parent of an element
+    const getScrollParent = (node: HTMLElement | null): HTMLElement | null => {
+        let el: HTMLElement | null = node;
+        while (el && el.parentElement) {
+            const parent = el.parentElement as HTMLElement;
+            const style = window.getComputedStyle(parent);
+            const overflowY = style.overflowY;
+            const canScroll = (overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight;
+            if (canScroll) return parent;
+            el = parent;
         }
-    }, [messages]);
+        return null;
+    };
+
+    useEffect(() => {
+        if (!messages || messages.length === 0) return;
+        const container = messagesContainerRef.current;
+        const endEl = messagesEndRef.current;
+        const target = endEl ? getScrollParent(endEl) || container : container;
+        if (!target) return;
+
+        const scrollToBottom = (smooth: boolean) => {
+            if (smooth) {
+                target.scrollTo({ top: target.scrollHeight, behavior: 'smooth' });
+            } else {
+                target.scrollTop = target.scrollHeight;
+            }
+        };
+
+        if (isFirstLoad.current) {
+            // Initial open: jump to bottom once
+            scrollToBottom(false);
+            isFirstLoad.current = false;
+            prevLenRef.current = messages.length;
+            return;
+        }
+
+        // Only auto-scroll when new messages were appended (length increased)
+        if (messages.length > prevLenRef.current) {
+            scrollToBottom(true);
+            prevLenRef.current = messages.length;
+        }
+    }, [messages, selectedContact?.id]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -163,12 +205,23 @@ export default function ChatInterface() {
     };
 
     const handleSelectContact = (contact: Contact) => {
-        setSelectedContact(contact);
-        setShowContacts(false);
+        if (standalone) {
+            setSelectedContact(contact);
+            setShowContacts(false);
+        } else {
+            const role = session?.user?.role;
+            const base = role === 'CARER' ? '/carer/chat' : '/dashboard/chat';
+            router.push(`${base}/${contact.id}`);
+        }
     };
 
     const handleBackToContacts = () => {
-        setShowContacts(true);
+        if (standalone) {
+            const role = session?.user?.role;
+            router.push(role === 'CARER' ? '/carer/chat' : '/dashboard/chat');
+        } else {
+            setShowContacts(true);
+        }
     };
 
     if (loadingContacts) {
@@ -185,9 +238,9 @@ export default function ChatInterface() {
                 <div className="bg-gray-100 p-4 rounded-full mb-4">
                     <MessageSquare size={32} className="text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">No care connections yet</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t('chat.no_connections_title')}</h3>
                 <p className="text-gray-500 max-w-sm mt-2">
-                    Once a carer is assigned to your family member, they will appear here and you can start chatting with them.
+                    {t('chat.no_connections_desc')}
                 </p>
             </div>
         );
@@ -196,6 +249,7 @@ export default function ChatInterface() {
     return (
         <div className="flex h-full bg-white md:rounded-xl md:border md:border-gray-100 overflow-hidden relative">
             {/* Contacts Sidebar */}
+            {!standalone && (
             <div className={cn(
                 "w-full md:w-1/3 md:border-r border-gray-100 flex flex-col bg-white shrink-0",
                 showContacts ? "flex" : "hidden md:flex"
@@ -204,7 +258,7 @@ export default function ChatInterface() {
                 <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
                     <input
                         type="text"
-                        placeholder="Search connections..."
+                        placeholder={t('chat.search')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-kera-vibrant focus:ring-1 focus:ring-kera-vibrant transition-all"
@@ -239,6 +293,7 @@ export default function ChatInterface() {
                         ))}
                 </div>
             </div>
+            )}
 
             {/* Chat Window */}
             <div className={cn(
@@ -268,12 +323,12 @@ export default function ChatInterface() {
                             </div>
                             <div className="ml-3 min-w-0">
                                 <p className="text-sm font-bold text-gray-900 truncate">{selectedContact.name}</p>
-                                <p className="text-[10px] text-green-500 font-medium">Online</p>
+                                <p className="text-[10px] text-green-500 font-medium">{t('chat.online')}</p>
                             </div>
                         </div>
 
                         {/* Messages Area - Scrollable */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30">
+                        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30">
                             {loadingMessages ? (
                                 <div className="flex items-center justify-center h-full">
                                     <Loader2 className="h-6 w-6 animate-spin text-kera-vibrant" />
@@ -341,7 +396,7 @@ export default function ChatInterface() {
                                         />
                                     ) : (
                                         <div className="h-20 w-20 flex items-center justify-center bg-gray-100 rounded-lg border border-gray-200">
-                                            <span className="text-xs text-gray-500">Video</span>
+                                            <span className="text-xs text-gray-500">{t('chat.video')}</span>
                                         </div>
                                     )}
                                     <button
@@ -372,7 +427,7 @@ export default function ChatInterface() {
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder="Type your message..."
+                                    placeholder={t('chat.type_message')}
                                     className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-kera-vibrant/20 focus:border-kera-vibrant"
                                 />
                                 <Button
@@ -388,7 +443,7 @@ export default function ChatInterface() {
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-6 text-center">
                         <MessageSquare size={48} className="text-gray-200 mb-4" />
-                        <p>Select a care connection to start chatting</p>
+                        <p>{t('chat.select_prompt')}</p>
                     </div>
                 )}
             </div>
