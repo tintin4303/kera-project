@@ -38,7 +38,7 @@ export default function CarerDashboard() {
                     <div className="rounded-full bg-accent p-2 mb-2">
                         <Users className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{t('carer.dashboard.patients')}</p>
+                    <p className="text-xs font-medium text-gray-500">{t('carer_dashboard.patients')}</p>
                     <p className="text-xl font-bold text-gray-900 mt-1">{patients.length}</p>
                 </Card>
 
@@ -46,7 +46,7 @@ export default function CarerDashboard() {
                     <div className="rounded-full bg-green-100 p-2 mb-2">
                         <Activity className="h-5 w-5 text-green-600" />
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{t('carer.dashboard.records')}</p>
+                    <p className="text-xs font-medium text-gray-500">{t('carer_dashboard.records')}</p>
                     <p className="text-xl font-bold text-gray-900 mt-1">0</p>
                 </Card>
 
@@ -54,7 +54,7 @@ export default function CarerDashboard() {
                     <div className="rounded-full bg-blue-100 p-2 mb-2">
                         <Calendar className="h-5 w-5 text-blue-600" />
                     </div>
-                    <p className="text-xs font-medium text-gray-500">{t('carer.dashboard.visits')}</p>
+                    <p className="text-xs font-medium text-gray-500">{t('carer_dashboard.visits')}</p>
                     <p className="text-xl font-bold text-gray-900 mt-1">0</p>
                 </Card>
             </div>
@@ -62,9 +62,9 @@ export default function CarerDashboard() {
             {/* Assigned Patients */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">{t('carer.dashboard.my_patients')}</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">{t('carer_dashboard.my_patients')}</h2>
                     <Link href="/carer/patients">
-                        <Button variant="ghost" size="sm">{t('carer.dashboard.view_all')}</Button>
+                        <Button variant="ghost" size="sm">{t('carer_dashboard.view_all')}</Button>
                     </Link>
                 </div>
 
@@ -75,9 +75,9 @@ export default function CarerDashboard() {
                 ) : patients.length === 0 ? (
                     <Card className="text-center py-12">
                         <Users className="mx-auto h-12 w-12 text-gray-300" />
-                        <h3 className="mt-4 text-sm font-semibold text-gray-900">{t('patients.none_assigned')}</h3>
+                        <h3 className="mt-4 text-sm font-semibold text-gray-900">{t('carer_dashboard.no_patients')}</h3>
                         <p className="mt-1 text-sm text-gray-500">
-                            {t('patients.contact_admin')}
+                            {t('carer_dashboard.contact_admin')}
                         </p>
                     </Card>
                 ) : (
@@ -86,9 +86,9 @@ export default function CarerDashboard() {
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
                                     <tr>
-                                        <th className="px-4 py-3 whitespace-nowrap">{t('patients.patient')}</th>
-                                        <th className="px-4 py-3 whitespace-nowrap">{t('patients.location')}</th>
-                                        <th className="px-4 py-3 text-right whitespace-nowrap">{t('carer.dashboard.records')}</th>
+                                        <th className="px-4 py-3 whitespace-nowrap">{t('nav.patients')}</th>
+                                        <th className="px-4 py-3 whitespace-nowrap">{t('carer_dashboard.location')}</th>
+                                        <th className="px-4 py-3 text-right whitespace-nowrap">{t('carer_dashboard.records')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -121,7 +121,7 @@ export default function CarerDashboard() {
 
             {/* Quick Actions */}
             <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('carer.dashboard.quick_actions')}</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('carer_dashboard.quick_actions')}</h2>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <Link href="/carer/patients">
                         <Card hover padding="sm" className="cursor-pointer text-center h-full active:scale-[0.98] transition-all">
@@ -129,7 +129,7 @@ export default function CarerDashboard() {
                                 <div className="rounded-full bg-purple-100 p-2 mb-2">
                                     <Plus className="h-5 w-5 text-purple-600" />
                                 </div>
-                                <p className="text-sm font-bold text-gray-900">{t('carer.dashboard.log_vitals')}</p>
+                                <p className="text-sm font-bold text-gray-900">{t('carer_dashboard.log_vitals')}</p>
                             </div>
                         </Card>
                     </Link>
@@ -140,7 +140,7 @@ export default function CarerDashboard() {
                                 <div className="rounded-full bg-blue-100 p-2 mb-2">
                                     <Calendar className="h-5 w-5 text-blue-600" />
                                 </div>
-                                <p className="text-sm font-bold text-gray-900">{t('carer.dashboard.schedule')}</p>
+                                <p className="text-sm font-bold text-gray-900">{t('carer_dashboard.schedule')}</p>
                             </div>
                         </Card>
                     </Link>
