@@ -5,6 +5,7 @@ import AddScheduleModal from '@/components/carer/AddScheduleModal';
 import CalendarView from '@/components/carer/CalendarView';
 import { Plus, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { isSameDay, format } from 'date-fns';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface Appointment {
     id: string;
@@ -19,6 +20,7 @@ interface Appointment {
 }
 
 export default function CarerSchedulePage() {
+    const { t } = useLanguage();
     const [view, setView] = useState<'Upcoming' | 'Past' | 'Calendar'>('Upcoming');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,11 +56,11 @@ export default function CarerSchedulePage() {
 
     const appointmentToCardProps = (appt: Appointment) => ({
         ...appt,
-        serviceType: appt.notes?.split('\n')[0]?.replace('Service: ', '') || 'Visit',
+        serviceType: appt.notes?.split('\n')[0]?.replace('Service: ', '') || t('carer_schedule.visit'),
         date: new Date(appt.scheduledAt).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
         time: new Date(appt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         patientName: appt.patient.name,
-        location: appt.location || 'Home Visit',
+        location: appt.location || t('carer_schedule.home_visit'),
         status: appt.status
     });
 
@@ -78,21 +80,21 @@ export default function CarerSchedulePage() {
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Upcoming' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    Upcoming
+                    {t('carer_schedule.upcoming')}
                 </button>
                 <button
                     onClick={() => setView('Calendar')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Calendar' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    Calendar
+                    {t('carer_schedule.calendar')}
                 </button>
                 <button
                     onClick={() => setView('Past')}
                     className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${view === 'Past' ? 'bg-white shadow-sm text-kera-vibrant' : 'text-gray-500'
                         }`}
                 >
-                    History
+                    {t('carer_schedule.history')}
                 </button>
             </div>
 
@@ -112,9 +114,9 @@ export default function CarerSchedulePage() {
 
                             <div className="mt-8">
                                 <h3 className="text-lg font-bold text-gray-900 mb-4 px-1 flex items-center justify-between">
-                                    <span>Visits on {format(selectedDate, 'MMM d, yyyy')}</span>
+                                    <span>{t('carer_schedule.visits_on')} {format(selectedDate, 'MMM d, yyyy')}</span>
                                     <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                        {filteredAppointments.length} Visit{filteredAppointments.length !== 1 && 's'}
+                                        {filteredAppointments.length} {filteredAppointments.length !== 1 ? t('carer_schedule.visits') : t('carer_schedule.visit')}
                                     </span>
                                 </h3>
                                 {filteredAppointments.length > 0 ? (
@@ -130,7 +132,7 @@ export default function CarerSchedulePage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
-                                        <p className="text-sm text-gray-500 italic">No visits scheduled for this date.</p>
+                                        <p className="text-sm text-gray-500 italic">{t('carer_schedule.no_visits')}</p>
                                     </div>
                                 )}
                             </div>
@@ -153,14 +155,14 @@ export default function CarerSchedulePage() {
                                     <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                         <CalendarIcon className="h-6 w-6 text-gray-300" />
                                     </div>
-                                    <h3 className="text-gray-900 font-medium">No upcoming schedules</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Start by adding a new visit or regular checkup.</p>
+                                    <h3 className="text-gray-900 font-medium">{t('carer_schedule.no_upcoming')}</h3>
+                                    <p className="text-sm text-gray-500 mt-1">{t('carer_schedule.add_visit_desc')}</p>
                                     <button
                                         onClick={() => setIsModalOpen(true)}
                                         className="mt-6 text-kera-vibrant font-medium text-sm flex items-center justify-center mx-auto"
                                     >
                                         <Plus className="h-4 w-4 mr-1" />
-                                        Add first schedule
+                                        {t('carer_schedule.add_first')}
                                     </button>
                                 </div>
                             )}
@@ -175,22 +177,22 @@ export default function CarerSchedulePage() {
                                         <table className="w-full text-sm text-left">
                                             <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
                                                 <tr>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Patient</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Date</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">Time</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Service</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap">Status</th>
-                                                    <th className="px-4 py-3 whitespace-nowrap hidden md:table-cell">Location</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">{t('carer_schedule.patient')}</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">{t('carer_schedule.date')}</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap hidden sm:table-cell">{t('carer_schedule.time')}</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">{t('carer_schedule.service')}</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap">{t('carer_schedule.status')}</th>
+                                                    <th className="px-4 py-3 whitespace-nowrap hidden md:table-cell">{t('carer_schedule.location')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
                                                 {filteredAppointments.map(a => {
                                                     const status = a.status.toUpperCase();
                                                     const disp =
-                                                        status === 'COMPLETED' ? 'Completed' :
-                                                        status === 'CANCELLED' ? 'Cancelled' : 'Completed';
+                                                        status === 'COMPLETED' ? t('carer_schedule.completed') :
+                                                        status === 'CANCELLED' ? t('carer_schedule.cancelled') : t('carer_schedule.completed');
                                                     const badge =
-                                                        disp === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                                                        disp === t('carer_schedule.completed') ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
                                                     return (
                                                         <tr key={a.id} className="hover:bg-gray-50 transition-colors">
                                                             <td className="px-4 py-3 whitespace-nowrap">
@@ -206,7 +208,7 @@ export default function CarerSchedulePage() {
                                                                 {new Date(a.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </td>
                                                             <td className="px-4 py-3 whitespace-nowrap">
-                                                                {(a.notes || '').split('\n')[0]?.replace('Service: ', '') || 'Visit'}
+                                                                {(a.notes || '').split('\n')[0]?.replace('Service: ', '') || t('carer_schedule.visit')}
                                                             </td>
                                                             <td className="px-4 py-3 whitespace-nowrap">
                                                                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badge}`}>
@@ -214,7 +216,7 @@ export default function CarerSchedulePage() {
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-3 whitespace-nowrap hidden md:table-cell">
-                                                                {a.location || 'Home'}
+                                                                {a.location || t('carer_schedule.home')}
                                                             </td>
                                                         </tr>
                                                     );
@@ -228,8 +230,8 @@ export default function CarerSchedulePage() {
                                     <div className="mx-auto w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4">
                                         <CalendarIcon className="h-6 w-6 text-gray-300" />
                                     </div>
-                                    <h3 className="text-gray-900 font-medium">No history</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Completed or cancelled schedules will appear here.</p>
+                                    <h3 className="text-gray-900 font-medium">{t('carer_schedule.no_history')}</h3>
+                                    <p className="text-sm text-gray-500 mt-1">{t('carer_schedule.history_desc')}</p>
                                 </div>
                             )}
                         </div>
@@ -241,7 +243,7 @@ export default function CarerSchedulePage() {
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="p-4 bg-kera-vibrant text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:scale-105 hover:shadow-xl transition-all duration-200 ring-4 ring-white"
-                    aria-label="Add Schedule"
+                    aria-label={t('carer_schedule.add_schedule')}
                 >
                     <Plus className="h-6 w-6 relative z-10" />
                 </button>

@@ -12,7 +12,9 @@ interface Contact {
     id: string;
     name: string;
     image?: string;
-    role: string;
+    role?: string;
+    lastMessage?: string | null;
+    lastMessageTime?: string | null;
 }
 
 interface Message {
@@ -24,6 +26,24 @@ interface Message {
     mediaType?: string | null;
     mediaUrl?: string | null;
 }
+
+const formatLastMessageTime = (isoString: string | null | undefined): string => {
+    if (!isoString) return '';
+    
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays < 7) return `${diffDays}d`;
+    
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+};
 
 export default function ChatInterface({ selectedContactId, standalone = false }: { selectedContactId?: string, standalone?: boolean }) {
     const { data: session } = useSession();
@@ -286,8 +306,15 @@ export default function ChatInterface({ selectedContactId, standalone = false }:
                                     )}
                                 </div>
                                 <div className="ml-3 text-left overflow-hidden flex-1">
-                                    <p className="text-sm font-semibold text-gray-900 truncate">{contact.name}</p>
-                                    <p className="text-xs text-gray-500 capitalize">{contact.role.toLowerCase()}</p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-sm font-semibold text-gray-900 truncate">{contact.name}</p>
+                                        {contact.lastMessageTime && (
+                                            <p className="text-xs text-gray-400 flex-shrink-0">{formatLastMessageTime(contact.lastMessageTime)}</p>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        {contact.lastMessage || <span className="italic text-gray-400">No messages yet</span>}
+                                    </p>
                                 </div>
                             </button>
                         ))}

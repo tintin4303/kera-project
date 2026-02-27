@@ -10,6 +10,7 @@ import AddHealthRecordModal from '@/components/dashboard/AddHealthRecordModal';
 import AddMedicationModal from '@/components/dashboard/AddMedicationModal';
 import AddReportModal from '@/components/dashboard/AddReportModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface Patient {
     id: string;
@@ -54,6 +55,7 @@ export default function CarerPatientDetail() {
     const params = useParams();
     const patientId = params.id as string;
     const queryClient = useQueryClient();
+    const { t } = useLanguage();
 
     const [isLogModalOpen, setIsLogModalOpen] = useState(false);
     const [isAddMedicationModalOpen, setIsAddMedicationModalOpen] = useState(false);
@@ -130,7 +132,7 @@ export default function CarerPatientDetail() {
     if (!patient) {
         return (
             <div className="text-center py-12">
-                <p className="text-gray-500">Patient not found</p>
+                <p className="text-gray-500">{t('carer_patient_detail.patient_not_found')}</p>
             </div>
         );
     }
@@ -144,7 +146,7 @@ export default function CarerPatientDetail() {
             <Link href="/carer/patients">
                 <Button variant="ghost" size="sm">
                     <ArrowLeft className="h-4 w-4" />
-                    Back to Patients
+                    {t('carer_patient_detail.back')}
                 </Button>
             </Link>
 
@@ -165,7 +167,7 @@ export default function CarerPatientDetail() {
                 </div>
                 <Button onClick={() => setIsLogModalOpen(true)} size="md">
                     <Plus className="h-4 w-4" />
-                    Log Vitals
+                    {t('carer_patient_detail.log_vitals')}
                 </Button>
             </div>
 
@@ -177,12 +179,12 @@ export default function CarerPatientDetail() {
                             <Activity className="h-5 w-5 text-red-600" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Blood Pressure</p>
+                            <p className="text-xs font-medium text-gray-500">{t('carer_patient_detail.blood_pressure')}</p>
                             <p className="text-lg font-bold text-gray-900">
                                 {latestBP ? `${latestBP.systolicBP}/${latestBP.diastolicBP}` : '--/--'}
                             </p>
                             <p className="text-xs text-gray-500">
-                                {latestBP ? formatDate(latestBP.recordedAt) : 'No data'}
+                                {latestBP ? formatDate(latestBP.recordedAt) : t('carer_patient_detail.no_data')}
                             </p>
                         </div>
                     </div>
@@ -194,12 +196,12 @@ export default function CarerPatientDetail() {
                             <Droplet className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Blood Glucose</p>
+                            <p className="text-xs font-medium text-gray-500">{t('carer_patient_detail.blood_glucose')}</p>
                             <p className="text-lg font-bold text-gray-900">
-                                {latestGlucose?.glucose || '--'} <span className="text-sm font-normal text-gray-500">mg/dL</span>
+                                {latestGlucose?.glucose || '--'} <span className="text-sm font-normal text-gray-500">{t('carer_patient_detail.mg_dl')}</span>
                             </p>
                             <p className="text-xs text-gray-500">
-                                {latestGlucose ? formatDate(latestGlucose.recordedAt) : 'No data'}
+                                {latestGlucose ? formatDate(latestGlucose.recordedAt) : t('carer_patient_detail.no_data')}
                             </p>
                         </div>
                     </div>
@@ -211,9 +213,9 @@ export default function CarerPatientDetail() {
                             <Heart className="h-5 w-5 text-primary" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-xs font-medium text-gray-500">Active Medications</p>
+                            <p className="text-xs font-medium text-gray-500">{t('carer_patient_detail.active_medications')}</p>
                             <p className="text-lg font-bold text-gray-900">{activeMeds.length}</p>
-                            <p className="text-xs text-gray-500">Prescriptions</p>
+                            <p className="text-xs text-gray-500">{t('carer_patient_detail.prescriptions')}</p>
                         </div>
                     </div>
                 </Card>
@@ -221,13 +223,13 @@ export default function CarerPatientDetail() {
 
             {/* Recent Health Records */}
             <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Health Records</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('carer_patient_detail.recent_records')}</h2>
                 {records.length === 0 ? (
                     <Card className="text-center py-12">
                         <Activity className="mx-auto h-12 w-12 text-gray-300" />
-                        <h3 className="mt-4 text-sm font-semibold text-gray-900">No records yet</h3>
+                        <h3 className="mt-4 text-sm font-semibold text-gray-900">{t('carer_patient_detail.no_records')}</h3>
                         <p className="mt-1 text-sm text-gray-500">
-                            Start logging vitals to track this patient&apos;s health.
+                            {t('carer_patient_detail.log_vitals_info')}
                         </p>
                     </Card>
                 ) : (
@@ -249,7 +251,7 @@ export default function CarerPatientDetail() {
                                     <div className="flex gap-4 text-sm">
                                         {record.systolicBP && record.diastolicBP && (
                                             <div className="text-center">
-                                                <p className="text-xs text-gray-500">BP</p>
+                                                <p className="text-xs text-gray-500">{t('carer_patient_detail.bp')}</p>
                                                 <p className="font-semibold text-gray-900">
                                                     {record.systolicBP}/{record.diastolicBP}
                                                 </p>
@@ -257,13 +259,13 @@ export default function CarerPatientDetail() {
                                         )}
                                         {record.glucose && (
                                             <div className="text-center">
-                                                <p className="text-xs text-gray-500">Glucose</p>
+                                                <p className="text-xs text-gray-500">{t('carer_patient_detail.glucose')}</p>
                                                 <p className="font-semibold text-gray-900">{record.glucose}</p>
                                             </div>
                                         )}
                                         {record.temperature && (
                                             <div className="text-center">
-                                                <p className="text-xs text-gray-500">Temp</p>
+                                                <p className="text-xs text-gray-500">{t('carer_patient_detail.temp')}</p>
                                                 <p className="font-semibold text-gray-900">{record.temperature}°C</p>
                                             </div>
                                         )}
@@ -278,14 +280,14 @@ export default function CarerPatientDetail() {
             {/* Active Medications */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Active Medications</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">{t('carer_patient_detail.active_medications')}</h2>
                     <Button
                         size="sm"
                         variant="secondary"
                         onClick={() => setIsAddMedicationModalOpen(true)}
                     >
                         <Plus className="h-4 w-4 mr-1.5" />
-                        Add Medication
+                        {t('carer_patient_detail.add_medication')}
                     </Button>
                 </div>
                 {activeMeds.length > 0 ? (
@@ -303,7 +305,7 @@ export default function CarerPatientDetail() {
                     </div>
                 ) : (
                     <Card className="text-center py-8 bg-gray-50 border-dashed">
-                        <p className="text-sm text-gray-500">No active medications</p>
+                        <p className="text-sm text-gray-500">{t('carer_patient_detail.no_active_medications')}</p>
                     </Card>
                 )}
             </div>
@@ -311,14 +313,14 @@ export default function CarerPatientDetail() {
             {/* Reports */}
             <div>
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Reports</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">{t('carer_patient_detail.reports')}</h2>
                     <Button
                         size="sm"
                         variant="secondary"
                         onClick={() => setIsAddReportModalOpen(true)}
                     >
                         <Plus className="h-4 w-4 mr-1.5" />
-                        Create Report
+                        {t('carer_patient_detail.create_report')}
                     </Button>
                 </div>
                 {reports.length > 0 ? (
@@ -335,7 +337,7 @@ export default function CarerPatientDetail() {
                                             <p className="text-xs text-gray-500">{formatDate(report.createdAt)}</p>
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">
-                                            Period: {new Date(report.periodStart).toLocaleDateString()} - {new Date(report.periodEnd).toLocaleDateString()}
+                                            {t('carer_patient_detail.period')} {new Date(report.periodStart).toLocaleDateString()} - {new Date(report.periodEnd).toLocaleDateString()}
                                         </p>
                                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">{report.summary}</p>
                                     </div>
@@ -345,7 +347,7 @@ export default function CarerPatientDetail() {
                     </div>
                 ) : (
                     <Card className="text-center py-8 bg-gray-50 border-dashed">
-                        <p className="text-sm text-gray-500">No reports created yet</p>
+                        <p className="text-sm text-gray-500">{t('carer_patient_detail.no_reports')}</p>
                     </Card>
                 )}
             </div>

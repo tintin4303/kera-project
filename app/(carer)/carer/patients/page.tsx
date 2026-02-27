@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface Patient {
     id: string;
@@ -19,6 +20,7 @@ interface Patient {
 }
 
 export default function CarerPatients() {
+    const { t } = useLanguage();
     const [searchTerm, setSearchTerm] = useState('');
     const { data: patients = [], isLoading: loading } = useQuery<Patient[]>({
         queryKey: ['carer-patients'],
@@ -41,9 +43,9 @@ export default function CarerPatients() {
             ) : patients.length === 0 ? (
                 <Card className="text-center py-12">
                     <Users className="mx-auto h-12 w-12 text-gray-300" />
-                    <h3 className="mt-4 text-sm font-semibold text-gray-900">No patients assigned</h3>
+                    <h3 className="mt-4 text-sm font-semibold text-gray-900">{t('carer_patients.no_patients')}</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                        Contact your administrator to get assigned to patients.
+                        {t('carer_patients.contact_admin')}
                     </p>
                 </Card>
             ) : (
@@ -51,7 +53,7 @@ export default function CarerPatients() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search patients..."
+                            placeholder={t('carer_patients.search_placeholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full sm:max-w-xs text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
@@ -60,7 +62,7 @@ export default function CarerPatients() {
 
                     {patients.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 ? (
                         <div className="text-center py-8 text-sm text-gray-500 bg-white rounded-xl border border-gray-200 border-dashed">
-                            No matching patients found
+                            {t('carer_patients.no_matching')}
                         </div>
                     ) : (
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -68,9 +70,9 @@ export default function CarerPatients() {
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
                                         <tr>
-                                            <th className="px-4 py-3 whitespace-nowrap">Patient</th>
-                                            <th className="px-4 py-3 whitespace-nowrap">Location</th>
-                                            <th className="px-4 py-3 text-right whitespace-nowrap">Records & Meds</th>
+                                            <th className="px-4 py-3 whitespace-nowrap">{t('nav.patients')}</th>
+                                            <th className="px-4 py-3 whitespace-nowrap">{t('carer_dashboard.location')}</th>
+                                            <th className="px-4 py-3 text-right whitespace-nowrap">{t('carer_patients.records_meds')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
@@ -93,12 +95,12 @@ export default function CarerPatients() {
                                                 <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
                                                     <div className="flex items-center justify-end gap-3 text-xs">
                                                         <span className="flex items-center gap-1" title="Health Records">
-                                                            <span className="text-gray-400">Records:</span>
+                                                            <span className="text-gray-400">{t('carer_dashboard.records')}:</span>
                                                             <span className="font-medium">{patient._count?.healthRecords || 0}</span>
                                                         </span>
                                                         <span className="text-gray-300">•</span>
                                                         <span className="flex items-center gap-1" title="Medications">
-                                                            <span className="text-gray-400">Meds:</span>
+                                                            <span className="text-gray-400">{t('carer_patients.medications')}:</span>
                                                             <span className="font-medium">{patient._count?.medications || 0}</span>
                                                         </span>
                                                     </div>

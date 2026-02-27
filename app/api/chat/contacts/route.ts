@@ -9,6 +9,26 @@ interface Contact {
     name: string | null;
     image: string | null;
     role: Role;
+    lastMessage?: string | null;
+    lastMessageTime?: Date | null;
+}
+
+async function getLastMessage(userId: string, contactId: string) {
+    const lastMessage = await prisma.message.findFirst({
+        where: {
+            OR: [
+                { senderId: userId, receiverId: contactId },
+                { senderId: contactId, receiverId: userId }
+            ]
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+            content: true,
+            mediaUrl: true,
+            createdAt: true
+        }
+    });
+    return lastMessage;
 }
 
 export async function GET() {
@@ -23,7 +43,7 @@ export async function GET() {
 
         if (!user) return new NextResponse("User not found", { status: 404 });
 
-        let contacts: Contact[] = [];
+        let contactObjects: Contact[] = [];
 
         if (user.role === 'MIGRANT') {
             // Get carers assigned to this migrant's patients
@@ -52,7 +72,7 @@ export async function GET() {
                     carerMap.set(p.carer.user.id, p.carer.user);
                 }
             });
-            contacts = Array.from(carerMap.values());
+            contactObjects = Array.from(carerMap.values());
         } else if (user.role === 'CARER') {
             // Get diagnostic - find the carer record for this user
             const carerRecord = await prisma.carer.findUnique({
@@ -76,17 +96,36 @@ export async function GET() {
                 });
 
                 // Extract unique migrants
-            const migrantMap = new Map<string, Contact>();
+                const migrantMap = new Map<string, Contact>();
                 patients.forEach(p => {
                     if (p.user) {
                         migrantMap.set(p.user.id, p.user);
                     }
                 });
-                contacts = Array.from(migrantMap.values());
+                contactObjects = Array.from(migrantMap.values());
             }
         }
 
-        return NextResponse.json(contacts);
+        // Fetch last message for each contact
+        const contactsWithMessages = await Promise.all(
+            contactObjects.map(async (contact) => {
+                const lastMessage = await getLastMessage(session.user.id, contact.id);
+                return {
+                    ...contact,
+                    lastMessage: lastMessage?.content || (lastMessage?.mediaUrl ? '[Media]' : null),
+                    lastMessageTime: lastMessage?.createdAt
+                };
+            })
+        );
+
+        // Sort by last message time (most recent first)
+        contactsWithMessages.sort((a, b) => {
+            const timeA = a.lastMessageTime?.getTime() || 0;
+            const timeB = b.lastMessageTime?.getTime() || 0;
+            return timeB - timeA;
+        });
+
+        return NextResponse.json(contactsWithMessages);
     } catch (error) {
         console.error("[CHAT_CONTACTS_GET]", error);
         return new NextResponse("Internal Error", { status: 500 });
