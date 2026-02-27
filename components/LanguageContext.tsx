@@ -321,7 +321,7 @@ const translations = {
         "carer_patients.records_meds": "အစမ်းများ & ဆေးများ",
         "carer_patients.medications": "ဆေးများ",
         "carer_patient_detail.back": "ပြန်သွားပါ",
-        "carer_patient_detail.log_vitals": "Vitals မှတ်သားပါ",
+        "carer_patient_detail.log_vitals": "Vitalsမှတ်ပါ",
         "carer_patient_detail.blood_pressure": "သွေးဖိအား",
         "carer_patient_detail.no_data": "အချက်အလက် မရှိပါ",
         "carer_patient_detail.blood_glucose": "သွေးသွင်းသကြား",

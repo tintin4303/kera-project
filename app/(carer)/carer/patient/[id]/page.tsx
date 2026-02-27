@@ -142,14 +142,6 @@ export default function CarerPatientDetail() {
 
     return (
         <div className="space-y-6">
-            {/* Back Button */}
-            <Link href="/carer/patients">
-                <Button variant="ghost" size="sm">
-                    <ArrowLeft className="h-4 w-4" />
-                    {t('carer_patient_detail.back')}
-                </Button>
-            </Link>
-
             {/* Patient Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
